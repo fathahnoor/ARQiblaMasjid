@@ -261,8 +261,8 @@ function relativeDirection(bearing, qibla) {
 
   const abs = Math.abs(Math.round(diff));
   if (abs <= 5) return t("alignedWithQibla");
-  if (diff > 0) return abs + "° R";
-  return abs + "° L";
+  if (diff > 0) return abs + "° right";
+  return abs + "° left";
 }
 
 function compassLabel(deg) {
@@ -560,14 +560,13 @@ function initUIBindings() {
     });
   }
 
-  // Language toggle
-  const langToggle = document.getElementById("lang-toggle");
-  if (langToggle) {
-    langToggle.addEventListener("click", () => {
+  // Language toggle (bind all instances)
+  document.querySelectorAll("#lang-toggle, #lang-toggle-masjids").forEach(btn => {
+    btn.addEventListener("click", () => {
       const newLang = AppState.lang === "en" ? "id" : "en";
       setLanguage(newLang);
     });
-  }
+  });
 
   // Other toggles with haptic feedback
   document.querySelectorAll(".switch-toggle input").forEach(input => {
@@ -643,18 +642,11 @@ function renderCompass(state) {
   const headingLabel = document.getElementById("heading-label");
 
   if (compassRing && state.qiblaBearing != null && state.heading != null) {
-    /**
-     * COMPASS ROTATION FIX:
-     * The arrow is at the TOP (0°) of the ring. We rotate the ring so the
-     * arrow points at the Qibla direction relative to the phone's heading.
-     *
-     * When the phone rotates clockwise (heading increases), the ring must
-     * rotate COUNTER-clockwise by the same amount to keep the arrow pointing
-     * at the fixed Qibla direction in the real world.
-     *
-     * formula: rotation = -(qiblaBearing - heading) = heading - qiblaBearing
-     */
-    const rotation = state.heading - state.qiblaBearing;
+    // The arrow is at the TOP (0°) of the ring. We rotate the ring so the
+    // arrow points at the Qibla direction relative to the phone's heading.
+    // When heading increases (phone rotates clockwise), rotation decreases
+    // so the arrow stays pointing at the fixed Qibla direction.
+    const rotation = state.qiblaBearing - state.heading;
     compassRing.style.transform = `rotate(${rotation}deg)`;
   }
 
@@ -701,7 +693,7 @@ function renderMosqueList(state) {
     const dir = state.qiblaBearing != null
       ? relativeDirection(m.bearing, state.qiblaBearing)
       : Math.round(m.bearing) + "°";
-    const iconDir = dir.includes("R") ? "north_east" : dir.includes("L") ? "north_west" : "explore";
+    const iconDir = dir.includes("right") ? "north_east" : dir.includes("left") ? "north_west" : "explore";
 
     return `
       <div class="group bg-surface-container-lowest rounded-xl p-stack-md border border-outline-variant/20 flex gap-stack-md items-center active:scale-[0.98] transition-transform duration-200 cursor-pointer">
@@ -756,7 +748,7 @@ function renderMasjidsScreen(state) {
     const dir = state.qiblaBearing != null
       ? relativeDirection(m.bearing, state.qiblaBearing)
       : Math.round(m.bearing) + "°";
-    const iconDir = dir.includes("R") ? "north_east" : dir.includes("L") ? "north_west" : "explore";
+    const iconDir = dir.includes("right") ? "north_east" : dir.includes("left") ? "north_west" : "explore";
 
     return `
       <div class="group bg-surface-container-lowest rounded-xl p-stack-md border border-outline-variant/20 flex gap-stack-md items-center active:scale-[0.98] transition-transform duration-200 cursor-pointer">
