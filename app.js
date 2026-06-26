@@ -19,88 +19,196 @@ const KABAH = Object.freeze({
 });
 
 const EARTH_RADIUS_KM = 6371;
-
-/** Error margin assumed for Qibla bearing (degrees). */
 const QIBLA_ERROR_MARGIN = 3;
-
-/** Search radius for nearby mosques (kilometres). */
 const SEARCH_RADIUS_KM = 2;
 
-/** Dummy mosque dataset (will be expanded or replaced with live data later). */
 const MOSQUE_DATA = [
-  { name: "Masjid Al-Ikhlas",     lat: 51.5194, lon: -0.0608 },
-  { name: "East London Mosque",   lat: 51.5195, lon: -0.0630 },
+  { name: "Masjid Al-Ikhlas",        lat: 51.5194, lon: -0.0608 },
+  { name: "East London Mosque",      lat: 51.5195, lon: -0.0630 },
   { name: "Brick Lane Jamme Masjid", lat: 51.5201, lon: -0.0706 },
-  { name: "Masjid Tauhidul Islam", lat: 51.5278, lon: -0.0554 },
-  { name: "Shah Jahan Mosque",    lat: 51.5132, lon: -0.0840 },
-  { name: "Masjid Umar",          lat: 51.5170, lon: -0.0580 },
-  { name: "London Central Mosque", lat: 51.5524, lon: -0.1728 },
-  { name: "Finsbury Park Mosque", lat: 51.5644, lon: -0.1065 },
-  { name: "Suleymaniye Mosque",   lat: 51.5208, lon: -0.0729 },
-  { name: "Masjid Al-Tawhid",     lat: 51.5592, lon: -0.0955 },
+  { name: "Masjid Tauhidul Islam",   lat: 51.5278, lon: -0.0554 },
+  { name: "Shah Jahan Mosque",       lat: 51.5132, lon: -0.0840 },
+  { name: "Masjid Umar",             lat: 51.5170, lon: -0.0580 },
+  { name: "London Central Mosque",   lat: 51.5524, lon: -0.1728 },
+  { name: "Finsbury Park Mosque",    lat: 51.5644, lon: -0.1065 },
+  { name: "Suleymaniye Mosque",      lat: 51.5208, lon: -0.0729 },
+  { name: "Masjid Al-Tawhid",        lat: 51.5592, lon: -0.0955 },
 ];
 
-/** Application state singleton. */
 const AppState = {
-  /** 'loading' | 'located' | 'error' */
   geoState: "loading",
-  /** 'loading' | 'active' | 'error' | 'unsupported' */
   compassState: "loading",
-  /** Current screen: 'home' | 'ar' | 'settings' */
   currentScreen: "home",
-
-  /** Position from Geolocation API. */
-  position: null, // { lat, lon, accuracy }
-
-  /** Device heading in degrees 0-360 (true or magnetic north). */
+  position: null,
   heading: null,
-
-  /** Computed Qibla bearing from user to Ka'bah. */
   qiblaBearing: null,
-
-  /** Distance from user to Ka'bah in km. */
   distanceToKabah: null,
-
-  /** Nearby mosques within SEARCH_RADIUS_KM. */
   nearbyMosques: [],
-
-  /** Callbacks for UI updates. */
+  lang: "en",
   _listeners: [],
-
-  /** Subscribe to state changes. */
   on(callback) { this._listeners.push(callback); },
-
-  /** Emit state change to all listeners. */
   emit() { this._listeners.forEach(cb => cb(this)); },
 };
 
 /* ==========================================================================
-   1. MATHEMATICAL UTILITIES
+   1. INTERNATIONALIZATION (EN / ID)
    ========================================================================== */
 
-/** Convert degrees to radians. */
+const I18N = {
+  en: {
+    appSubtitle: "AR Qibla & Mosque Finder",
+    waitingLocation: "Waiting for location…",
+    requestingGps: "Requesting GPS permission",
+    locationLabel: "Location",
+    accuracyLabel: "Accuracy",
+    locationUnavailable: "Location unavailable",
+    permissionDenied: "Permission denied",
+    checkSettings: "Check device settings",
+    waiting: "WAITING",
+    live: "LIVE",
+    error: "ERROR",
+    qibla: "Qibla",
+    distanceToKabah: "Distance to Ka'bah",
+    nearbyMasjids: "Nearby Masjids",
+    radius: "Radius",
+    noMosques: "No mosques found within",
+    km: "km",
+    enterArView: "Enter AR View",
+    settingsAndInfo: "Settings & Info",
+    aboutTitle: "About ARQiblaMasjid",
+    aboutDesc: "A modern tool for the global Muslim community, combining AR technology with traditional needs. Designed for precision, privacy, and peace of mind.",
+    calibrationTitle: "Calibration & Accuracy",
+    calibrationDesc1: "For the most precise results, calibrate your phone's compass by moving it in a smooth",
+    calibrationDesc2: "figure-8 motion",
+    calibrationDesc3: "in the air.",
+    calibrationNote: "A slight difference of a few degrees in Qibla direction is still within acceptable tolerance according to many scholars and astronomers. Do not worry about very small deviations.",
+    electromagneticWarning: "Note: Electromagnetic interference from nearby metal or electronics can affect results.",
+    pushNotifications: "Push Notifications",
+    metricUnits: "Use Metric Units",
+    darkMode: "Dark Mode",
+    privacyTitle: "Privacy",
+    privacyDesc: "Your location is processed",
+    privacyDescBold: "locally on-device",
+    privacyDesc2: "to calculate bearings and find nearby mosques. We do not store or transmit your precise coordinates.",
+    viewPrivacyPolicy: "VIEW FULL PRIVACY POLICY",
+    version: "v1.0.0",
+    alignedWithQibla: "aligned",
+    enableCompass: "Enable compass sensor for accurate Qibla direction.",
+    enable: "Enable",
+    arModeExperimental: "AR Mode: Experimental",
+    alignPhone: "Align your phone to find Qibla",
+    levelPhone: "Level Your Phone",
+    getPath: "Get Path",
+    navigate: "Navigate",
+    switchTo: "Switch to",
+    map2d: "2D Map",
+    language: "Language",
+    allMasjids: "All Masjids",
+    allMasjidsDesc: "Mosques nearby your location",
+    open: "Open",
+    gettingLocation: "Getting your location…",
+    langToggle: "ID",
+  },
+  id: {
+    appSubtitle: "Penunjuk Arah Kibla & Masjid AR",
+    waitingLocation: "Menunggu lokasi…",
+    requestingGps: "Meminta izin GPS",
+    locationLabel: "Lokasi",
+    accuracyLabel: "Akurasi",
+    locationUnavailable: "Lokasi tidak tersedia",
+    permissionDenied: "Izin ditolak",
+    checkSettings: "Periksa pengaturan perangkat",
+    waiting: "MENUNGGU",
+    live: "LANGSUNG",
+    error: "GAGAL",
+    qibla: "Kiblat",
+    distanceToKabah: "Jarak ke Ka'bah",
+    nearbyMasjids: "Masjid Terdekat",
+    radius: "Jarak",
+    noMosques: "Tidak ada masjid dalam jarak",
+    km: "km",
+    enterArView: "Masuk Mode AR",
+    settingsAndInfo: "Pengaturan & Info",
+    aboutTitle: "Tentang ARQiblaMasjid",
+    aboutDesc: "Alat modern untuk umat Muslim global, menggabungkan teknologi AR dengan kebutuhan tradisional. Dirancang untuk presisi, privasi, dan ketenangan pikiran.",
+    calibrationTitle: "Kalibrasi & Akurasi",
+    calibrationDesc1: "Untuk hasil paling akurat, kalibrasi kompas ponsel Anda dengan menggerakkannya dalam gerakan",
+    calibrationDesc2: "angka delapan",
+    calibrationDesc3: "di udara.",
+    calibrationNote: "Perbedaan beberapa derajat arah kiblat masih dalam batas toleransi menurut banyak ulama dan astronom. Jangan khawatir dengan deviasi yang sangat kecil.",
+    electromagneticWarning: "Catatan: Interferensi elektromagnetik dari logam atau elektronik di sekitar dapat mempengaruhi hasil.",
+    pushNotifications: "Notifikasi Push",
+    metricUnits: "Gunakan Satuan Metrik",
+    darkMode: "Mode Gelap",
+    privacyTitle: "Privasi",
+    privacyDesc: "Lokasi Anda diproses",
+    privacyDescBold: "secara lokal di perangkat",
+    privacyDesc2: "untuk menghitung bearing dan menemukan masjid terdekat. Kami tidak menyimpan atau mengirim koordinat Anda.",
+    viewPrivacyPolicy: "LIHAT KEBIJAKAN PRIVASI LENGKAP",
+    version: "v1.0.0",
+    alignedWithQibla: "selaras",
+    enableCompass: "Aktifkan sensor kompas untuk arah kiblat yang akurat.",
+    enable: "Aktifkan",
+    arModeExperimental: "Mode AR: Eksperimental",
+    alignPhone: "Arahkan ponsel untuk menemukan Kiblat",
+    levelPhone: "Ratakan Ponsel Anda",
+    getPath: "Dapatkan Jalur",
+    navigate: "Navigasi",
+    switchTo: "Beralih ke",
+    map2d: "Peta 2D",
+    language: "Bahasa",
+    allMasjids: "Semua Masjid",
+    allMasjidsDesc: "Masjid di sekitar lokasi Anda",
+    open: "Buka",
+    gettingLocation: "Mendapatkan lokasi Anda…",
+    langToggle: "EN",
+  },
+};
+
+function t(key) {
+  return I18N[AppState.lang][key] || I18N.en[key] || key;
+}
+
+function setLanguage(lang) {
+  AppState.lang = lang;
+  document.documentElement.lang = lang === "id" ? "id" : "en";
+  applyTranslations();
+  AppState.emit();
+}
+
+function applyTranslations() {
+  document.querySelectorAll("[data-i18n]").forEach(el => {
+    const key = el.getAttribute("data-i18n");
+    const text = t(key);
+    if (text) {
+      if (el.tagName === "INPUT" && el.type === "checkbox") return;
+      el.textContent = text;
+    }
+  });
+  document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
+    const key = el.getAttribute("data-i18n-placeholder");
+    el.placeholder = t(key);
+  });
+}
+
+/* ==========================================================================
+   2. MATHEMATICAL UTILITIES
+   ========================================================================== */
+
 function toRad(deg) {
   return (deg * Math.PI) / 180;
 }
 
-/** Convert radians to degrees. */
 function toDeg(rad) {
   return (rad * 180) / Math.PI;
 }
 
-/**
- * Compute the Qibla bearing from a user's GPS location to the Ka'bah.
- * Uses the standard great-circle forward-azimuth formula.
- * @param {number} lat  User latitude  (degrees)
- * @param {number} lon  User longitude (degrees)
- * @returns {number} Bearing in degrees 0-360
- */
 function computeQiblaBearing(lat, lon) {
-  const φ1  = toRad(lat);
-  const λ1  = toRad(lon);
-  const φk  = toRad(KABAH.lat);
-  const λk  = toRad(KABAH.lon);
-  const Δλ  = λk - λ1;
+  const φ1 = toRad(lat);
+  const λ1 = toRad(lon);
+  const φk = toRad(KABAH.lat);
+  const λk = toRad(KABAH.lon);
+  const Δλ = λk - λ1;
 
   const y = Math.sin(Δλ) * Math.cos(φk);
   const x =
@@ -111,14 +219,6 @@ function computeQiblaBearing(lat, lon) {
   return ((θ % 360) + 360) % 360;
 }
 
-/**
- * Compute the great-circle distance between two GPS points (Haversine).
- * @param {number} lat1
- * @param {number} lon1
- * @param {number} lat2
- * @param {number} lon2
- * @returns {number} Distance in kilometres
- */
 function computeDistance(lat1, lon1, lat2, lon2) {
   const φ1 = toRad(lat1);
   const φ2 = toRad(lat2);
@@ -133,10 +233,6 @@ function computeDistance(lat1, lon1, lat2, lon2) {
   return EARTH_RADIUS_KM * c;
 }
 
-/**
- * Compute the bearing from point 1 to point 2.
- * @returns {number} Bearing in degrees 0-360
- */
 function computeBearing(lat1, lon1, lat2, lon2) {
   const φ1 = toRad(lat1);
   const φ2 = toRad(lat2);
@@ -151,43 +247,31 @@ function computeBearing(lat1, lon1, lat2, lon2) {
   return ((θ % 360) + 360) % 360;
 }
 
-/**
- * Format distance for display.
- * @param {number} km  Distance in km
- * @returns {string}
- */
 function formatDistance(km) {
   if (km < 1) {
     return Math.round(km * 1000) + " m";
   }
-  return km.toFixed(1) + " km";
+  return km.toFixed(1) + " " + t("km");
 }
 
-/**
- * Compute the relative direction string from a bearing relative to qibla.
- * @param {number} bearing  Absolute bearing in degrees
- * @param {number} qibla    Qibla bearing in degrees
- * @returns {string}
- */
 function relativeDirection(bearing, qibla) {
   let diff = bearing - qibla;
   if (diff > 180) diff -= 360;
   if (diff < -180) diff += 360;
 
   const abs = Math.abs(Math.round(diff));
-  if (abs <= 5) return "aligned with Qibla";
-  if (diff > 0) return abs + "° right";
-  return abs + "° left";
+  if (abs <= 5) return t("alignedWithQibla");
+  if (diff > 0) return abs + "° R";
+  return abs + "° L";
 }
 
-/** Compass degree label (N, NE, E, SE, S, SW, W, NW). */
 function compassLabel(deg) {
   const dirs = ["N","NE","E","SE","S","SW","W","NW"];
   return dirs[Math.round(deg / 45) % 8];
 }
 
 /* ==========================================================================
-   2. GEOLOCATION
+   3. GEOLOCATION
    ========================================================================== */
 
 function initGeolocation() {
@@ -204,7 +288,6 @@ function initGeolocation() {
 
   navigator.geolocation.getCurrentPosition(onGeoSuccess, onGeoError, options);
 
-  // Also watch for updates
   AppState._geoWatchId = navigator.geolocation.watchPosition(
     onGeoSuccess,
     onGeoError,
@@ -217,13 +300,10 @@ function onGeoSuccess(pos) {
   AppState.position = { lat: latitude, lon: longitude, accuracy };
   AppState.geoState = "located";
 
-  // Compute Qibla data
   AppState.qiblaBearing = computeQiblaBearing(latitude, longitude);
   AppState.distanceToKabah = computeDistance(latitude, longitude, KABAH.lat, KABAH.lon);
 
-  // Compute nearby mosques
   computeNearbyMosques(latitude, longitude);
-
   AppState.emit();
 }
 
@@ -245,7 +325,7 @@ function computeNearbyMosques(lat, lon) {
 }
 
 /* ==========================================================================
-   3. DEVICE ORIENTATION (COMPASS)
+   4. DEVICE ORIENTATION (COMPASS)
    ========================================================================== */
 
 function initOrientation() {
@@ -255,11 +335,9 @@ function initOrientation() {
     return;
   }
 
-  // iOS 13+ requires explicit permission request on user gesture
   if (typeof DeviceOrientationEvent.requestPermission === "function") {
     AppState.compassState = "requesting";
     AppState.emit();
-    // Will be triggered by a button tap; see requestOrientationPermission()
   } else {
     startListeningOrientation();
   }
@@ -287,17 +365,13 @@ async function requestOrientationPermission() {
 let _absoluteSupported = false;
 
 function startListeningOrientation() {
-  // Prefer deviceorientationabsolute (Android) for true north heading.
-  // If it fires, we skip the generic deviceorientation handler.
-  window.addEventListener("deviceorientationabsolute", function onAbs(e) {
+  window.addEventListener("deviceorientationabsolute", function (e) {
     _absoluteSupported = true;
     handleOrientation(e);
-    // Keep listening for updates
   }, true);
 
-  // Fallback: generic deviceorientation (used when absolute is not available)
-  window.addEventListener("deviceorientation", function onGeneric(e) {
-    if (_absoluteSupported) return; // absolute is active, skip generic
+  window.addEventListener("deviceorientation", function (e) {
+    if (_absoluteSupported) return;
     handleOrientation(e);
   }, true);
 
@@ -305,18 +379,22 @@ function startListeningOrientation() {
   AppState.emit();
 }
 
+/**
+ * Handle orientation events and normalise heading to 0-360 clockwise from north.
+ *
+ * CRITICAL FIX: On many Android browsers, `deviceorientationabsolute` provides
+ * `alpha` that increases COUNTER-CLOCKWISE (standard spec). We must invert it
+ * to get a clockwise compass heading. The previous code used `event.alpha`
+ * directly for the absolute event, which caused the arrow to spin the wrong way.
+ */
 function handleOrientation(event) {
   let heading = null;
 
-  // iOS: webkitCompassHeading is magnetic north (0-360)
+  // iOS: webkitCompassHeading is magnetic north (0-360, clockwise)
   if (event.webkitCompassHeading != null) {
     heading = event.webkitCompassHeading;
   }
-  // Android with absolute orientation: alpha is already compass heading (0-360)
-  else if (event.type === "deviceorientationabsolute" && event.alpha != null) {
-    heading = event.alpha;
-  }
-  // Android generic: alpha needs inversion (0-360, counter-clockwise from north)
+  // Android absolute / generic: alpha needs inversion to become clockwise
   else if (event.alpha != null) {
     heading = (360 - event.alpha) % 360;
   }
@@ -328,79 +406,152 @@ function handleOrientation(event) {
 }
 
 /* ==========================================================================
-   4. SCREEN / SPA NAVIGATION
+   5. CAMERA (AR VIEW)
+   ========================================================================== */
+
+let _arCameraStream = null;
+
+function startARCamera() {
+  if (_arCameraStream) return; // already started
+
+  const video = document.getElementById("ar-camera-video");
+  const fallback = document.getElementById("ar-camera-fallback");
+  if (!video) return;
+
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    // Camera not supported — show fallback image
+    if (fallback) fallback.classList.remove("hidden");
+    return;
+  }
+
+  navigator.mediaDevices.getUserMedia({
+    video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 720 } }
+  })
+  .then(stream => {
+    _arCameraStream = stream;
+    video.srcObject = stream;
+    video.play().catch(() => {});
+    video.classList.remove("hidden");
+    if (fallback) fallback.classList.add("hidden");
+  })
+  .catch(() => {
+    // Camera denied or unavailable — show fallback image
+    if (fallback) fallback.classList.remove("hidden");
+  });
+}
+
+function stopARCamera() {
+  if (_arCameraStream) {
+    _arCameraStream.getTracks().forEach(t => t.stop());
+    _arCameraStream = null;
+  }
+  const video = document.getElementById("ar-camera-video");
+  if (video) {
+    video.srcObject = null;
+    video.classList.add("hidden");
+  }
+}
+
+/* ==========================================================================
+   6. SCREEN / SPA NAVIGATION
    ========================================================================== */
 
 function navigateTo(screen) {
   AppState.currentScreen = screen;
 
-  // Hide all screens
   document.querySelectorAll("[data-screen]").forEach(el => {
     el.classList.add("hidden");
     el.classList.remove("screen-active");
   });
 
-  // Show target screen
   const target = document.querySelector(`[data-screen="${screen}"]`);
   if (target) {
     target.classList.remove("hidden");
     target.classList.add("screen-active");
   }
 
-  // Toggle bottom nav visibility
+  // Bottom nav: visible on home and masjids, hidden on ar and settings
   const bottomNav = document.getElementById("bottom-nav");
   if (bottomNav) {
-    bottomNav.classList.toggle("hidden", screen === "ar");
+    bottomNav.classList.toggle("hidden", screen === "ar" || screen === "settings");
   }
 
-  // Enter / exit AR scene
+  // Camera
   if (screen === "ar") {
     document.body.classList.add("ar-active");
+    startARCamera();
   } else {
     document.body.classList.remove("ar-active");
+    stopARCamera();
+  }
+
+  // Update active tab styling
+  updateActiveTab(screen);
+
+  // Scroll to top for masjids screen
+  if (screen === "masjids") {
+    window.scrollTo(0, 0);
   }
 
   AppState.emit();
 }
 
+function updateActiveTab(screen) {
+  // Reset all nav buttons
+  document.querySelectorAll("[data-nav-home], [data-nav-masjids], [data-nav-settings]").forEach(btn => {
+    btn.classList.remove("bg-secondary-container", "text-on-secondary-container", "rounded-full");
+    btn.classList.add("text-on-surface-variant");
+  });
+
+  // Highlight active tab
+  let activeSelector = "[data-nav-home]";
+  if (screen === "masjids") activeSelector = "[data-nav-masjids]";
+  if (screen === "settings") activeSelector = "[data-nav-settings]";
+
+  document.querySelectorAll(activeSelector).forEach(btn => {
+    btn.classList.add("bg-secondary-container", "text-on-secondary-container", "rounded-full");
+    btn.classList.remove("text-on-surface-variant");
+  });
+}
+
 /* ==========================================================================
-   5. UI RENDERING
+   7. UI RENDERING
    ========================================================================== */
 
 function initUIBindings() {
-  // --- Navigation tabs ---
-  const tabs = {
-    home: document.querySelectorAll("[data-nav-home]"),
-    settings: document.querySelectorAll("[data-nav-settings]"),
-    masjids: document.querySelectorAll("[data-nav-masjids]"),
-  };
+  // Navigation tabs
+  document.querySelectorAll("[data-nav-home]").forEach(btn => {
+    btn.addEventListener("click", () => navigateTo("home"));
+  });
+  document.querySelectorAll("[data-nav-settings]").forEach(btn => {
+    btn.addEventListener("click", () => navigateTo("settings"));
+  });
+  document.querySelectorAll("[data-nav-masjids]").forEach(btn => {
+    btn.addEventListener("click", () => navigateTo("masjids"));
+  });
 
-  if (tabs.home) tabs.home.forEach(btn => btn.addEventListener("click", () => navigateTo("home")));
-  if (tabs.settings) tabs.settings.forEach(btn => btn.addEventListener("click", () => navigateTo("settings")));
-  if (tabs.masjids) tabs.masjids.forEach(btn => btn.addEventListener("click", () => navigateTo("home"))); // Scroll to mosque list
-
-  // --- Enter AR ---
+  // Enter AR
   document.querySelectorAll("[data-enter-ar]").forEach(btn => {
     btn.addEventListener("click", () => navigateTo("ar"));
   });
 
-  // --- Back from AR ---
+  // Back from AR
   document.querySelectorAll("[data-back-ar]").forEach(btn => {
     btn.addEventListener("click", () => navigateTo("home"));
   });
 
-  // --- Settings button in header ---
+  // Settings button in header
   document.querySelectorAll("[data-open-settings]").forEach(btn => {
     btn.addEventListener("click", () => navigateTo("settings"));
   });
 
-  // --- Compass sensor permission button (iOS) ---
+  // Compass sensor permission (iOS)
   const sensorBtn = document.getElementById("btn-request-sensor");
   if (sensorBtn) {
     sensorBtn.addEventListener("click", requestOrientationPermission);
   }
 
-  // --- Dark mode toggle ---
+  // Dark mode toggle
   const darkToggle = document.getElementById("dark-mode-toggle");
   if (darkToggle) {
     darkToggle.addEventListener("change", () => {
@@ -409,32 +560,38 @@ function initUIBindings() {
     });
   }
 
-  // --- Other toggles with haptic feedback ---
+  // Language toggle
+  const langToggle = document.getElementById("lang-toggle");
+  if (langToggle) {
+    langToggle.addEventListener("click", () => {
+      const newLang = AppState.lang === "en" ? "id" : "en";
+      setLanguage(newLang);
+    });
+  }
+
+  // Other toggles with haptic feedback
   document.querySelectorAll(".switch-toggle input").forEach(input => {
     input.addEventListener("change", () => {
       if (navigator.vibrate) navigator.vibrate(10);
     });
   });
 
-  // --- Haptic feedback on all buttons ---
+  // Haptic feedback on all buttons
   document.querySelectorAll("button, [role='button']").forEach(el => {
     el.addEventListener("click", () => {
       if (navigator.vibrate) navigator.vibrate(5);
     });
   });
 
-  // Start on home screen
   navigateTo("home");
 }
 
-/**
- * Master render function – called on every state change.
- */
 function render(state) {
   renderGeoStatus(state);
   renderCompass(state);
   renderQiblaInfo(state);
   renderMosqueList(state);
+  renderMasjidsScreen(state);
   renderARView(state);
 }
 
@@ -446,38 +603,37 @@ function renderGeoStatus(state) {
   const icon = document.getElementById("geo-status-icon");
   const sensorBanner = document.getElementById("sensor-permission-banner");
 
-  // Show iOS sensor permission banner when compass is waiting
   if (sensorBanner) {
     sensorBanner.classList.toggle("hidden", state.compassState !== "requesting");
   }
 
   if (!card) return;
 
+  // Reset classes
+  card.className = "rounded-xl p-stack-md border border-outline-variant/20 flex items-center justify-between shadow-sm";
+
   if (state.geoState === "loading") {
-    card.className = card.className.replace(/bg-\S+/g, "").trim();
-    card.classList.add("bg-surface-container-lowest", "rounded-xl", "p-stack-md", "border", "border-outline-variant/20", "flex", "items-center", "justify-between", "shadow-sm");
+    card.classList.add("bg-surface-container-lowest");
     if (icon) { icon.textContent = "hourglass_empty"; icon.style.color = ""; }
-    if (locText) locText.textContent = "Waiting for location…";
-    if (locSub) locSub.textContent = "Requesting GPS permission";
-    if (badge) { badge.textContent = "WAITING"; badge.className = "font-mono-tech text-mono-tech bg-surface-container-high text-on-surface-variant px-2 py-1 rounded-full"; }
+    if (locText) locText.textContent = t("waitingLocation");
+    if (locSub) locSub.textContent = t("requestingGps");
+    if (badge) { badge.textContent = t("waiting"); badge.className = "font-mono-tech text-mono-tech bg-surface-container-high text-on-surface-variant px-2 py-1 rounded-full badge-pulse"; }
   } else if (state.geoState === "located") {
-    card.className = card.className.replace(/bg-\S+/g, "").trim();
-    card.classList.add("bg-surface-container-lowest", "rounded-xl", "p-stack-md", "border", "border-outline-variant/20", "flex", "items-center", "justify-between", "shadow-sm");
+    card.classList.add("bg-surface-container-lowest");
     const p = state.position;
     if (icon) { icon.textContent = "check_circle"; icon.style.color = ""; }
-    if (locText) locText.textContent = `Location: ${p.lat.toFixed(4)}°, ${p.lon.toFixed(4)}°`;
-    if (locSub) locSub.textContent = `Accuracy: ~${Math.round(p.accuracy)}m`;
-    if (badge) { badge.textContent = "LIVE"; badge.className = "font-mono-tech text-mono-tech bg-secondary-container/30 text-on-secondary-container px-2 py-1 rounded-full"; }
+    if (locText) locText.textContent = `${t("locationLabel")}: ${p.lat.toFixed(4)}°, ${p.lon.toFixed(4)}°`;
+    if (locSub) locSub.textContent = `${t("accuracyLabel")}: ~${Math.round(p.accuracy)}m`;
+    if (badge) { badge.textContent = t("live"); badge.className = "font-mono-tech text-mono-tech bg-secondary-container/30 text-on-secondary-container px-2 py-1 rounded-full"; }
   } else if (state.geoState === "error") {
-    card.className = card.className.replace(/bg-\S+/g, "").trim();
-    card.classList.add("bg-error-container", "rounded-xl", "p-stack-md", "border", "border-error/20", "flex", "items-center", "justify-between", "shadow-sm");
+    card.classList.add("bg-error-container");
     if (icon) { icon.textContent = "error"; icon.style.color = ""; }
-    if (locText) locText.textContent = "Location unavailable";
+    if (locText) locText.textContent = t("locationUnavailable");
     const errMsg = state._geoError
-      ? (state._geoError.code === 1 ? "Permission denied" : "Error: " + state._geoError.message)
-      : "Check device settings";
+      ? (state._geoError.code === 1 ? t("permissionDenied") : "Error: " + state._geoError.message)
+      : t("checkSettings");
     if (locSub) locSub.textContent = errMsg;
-    if (badge) { badge.textContent = "ERROR"; badge.className = "font-mono-tech text-mono-tech bg-error/20 text-on-error-container px-2 py-1 rounded-full"; }
+    if (badge) { badge.textContent = t("error"); badge.className = "font-mono-tech text-mono-tech bg-error/20 text-on-error-container px-2 py-1 rounded-full"; }
   }
 }
 
@@ -487,8 +643,18 @@ function renderCompass(state) {
   const headingLabel = document.getElementById("heading-label");
 
   if (compassRing && state.qiblaBearing != null && state.heading != null) {
-    // Rotate compass ring so the Qibla arrow points in the right direction
-    const rotation = state.qiblaBearing - state.heading;
+    /**
+     * COMPASS ROTATION FIX:
+     * The arrow is at the TOP (0°) of the ring. We rotate the ring so the
+     * arrow points at the Qibla direction relative to the phone's heading.
+     *
+     * When the phone rotates clockwise (heading increases), the ring must
+     * rotate COUNTER-clockwise by the same amount to keep the arrow pointing
+     * at the fixed Qibla direction in the real world.
+     *
+     * formula: rotation = -(qiblaBearing - heading) = heading - qiblaBearing
+     */
+    const rotation = state.heading - state.qiblaBearing;
     compassRing.style.transform = `rotate(${rotation}deg)`;
   }
 
@@ -508,34 +674,24 @@ function renderCompass(state) {
 function renderQiblaInfo(state) {
   const distEl = document.getElementById("kabah-distance");
   const marginEl = document.getElementById("qibla-margin");
-  const bearingTag = document.getElementById("qibla-bearing-tag");
 
   if (distEl && state.distanceToKabah != null) {
     distEl.textContent = formatDistance(state.distanceToKabah);
   }
 
   if (marginEl) {
-    marginEl.textContent = `± ${QIBLA_ERROR_MARGIN}° approx.`;
-  }
-
-  if (bearingTag && state.qiblaBearing != null) {
-    bearingTag.textContent = `BEARING: ${Math.round(state.qiblaBearing)}°`;
+    marginEl.textContent = `± ${QIBLA_ERROR_MARGIN}°`;
   }
 }
 
 function renderMosqueList(state) {
   const container = document.getElementById("mosque-list");
-  const radiusLabel = document.getElementById("mosque-radius-label");
   if (!container) return;
-
-  if (radiusLabel) {
-    radiusLabel.textContent = `Radius: ${SEARCH_RADIUS_KM} km`;
-  }
 
   if (state.nearbyMosques.length === 0) {
     container.innerHTML = `
       <div class="bg-surface-container-lowest rounded-xl p-stack-md border border-outline-variant/20 text-center">
-        <p class="font-body-sm text-body-sm text-outline">No mosques found within ${SEARCH_RADIUS_KM} km.</p>
+        <p class="font-body-sm text-body-sm text-outline">${t("noMosques")} ${SEARCH_RADIUS_KM} ${t("km")}.</p>
       </div>`;
     return;
   }
@@ -544,11 +700,11 @@ function renderMosqueList(state) {
     const dist = formatDistance(m.distance);
     const dir = state.qiblaBearing != null
       ? relativeDirection(m.bearing, state.qiblaBearing)
-      : Math.round(m.bearing) + "° bearing";
-    const iconDir = dir.includes("right") ? "north_east" : dir.includes("left") ? "north_west" : "explore";
+      : Math.round(m.bearing) + "°";
+    const iconDir = dir.includes("R") ? "north_east" : dir.includes("L") ? "north_west" : "explore";
 
     return `
-      <div class="group bg-surface-container-lowest rounded-xl p-stack-md border border-outline-variant/20 flex gap-stack-md items-center active:scale-[0.98] transition-transform duration-200 cursor-pointer" data-mosque-idx="${i}">
+      <div class="group bg-surface-container-lowest rounded-xl p-stack-md border border-outline-variant/20 flex gap-stack-md items-center active:scale-[0.98] transition-transform duration-200 cursor-pointer">
         <div class="w-12 h-12 rounded-lg bg-primary-container/20 flex items-center justify-center flex-shrink-0">
           <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">mosque</span>
         </div>
@@ -570,100 +726,152 @@ function renderMosqueList(state) {
   }).join("");
 }
 
+/**
+ * Render the dedicated Masjids screen with all nearby mosques.
+ */
+function renderMasjidsScreen(state) {
+  const container = document.getElementById("masjids-screen-list");
+  if (!container) return;
+
+  if (state.nearbyMosques.length === 0 && state.geoState === "located") {
+    container.innerHTML = `
+      <div class="bg-surface-container-lowest rounded-xl p-stack-lg border border-outline-variant/20 text-center">
+        <span class="material-symbols-outlined text-outline text-4xl mb-2">mosque</span>
+        <p class="font-body-sm text-body-sm text-outline">${t("noMosques")} ${SEARCH_RADIUS_KM} ${t("km")}.</p>
+      </div>`;
+    return;
+  }
+
+  if (state.geoState !== "located") {
+    container.innerHTML = `
+      <div class="bg-surface-container-lowest rounded-xl p-stack-lg border border-outline-variant/20 text-center">
+        <span class="material-symbols-outlined text-outline text-4xl mb-2">location_searching</span>
+        <p class="font-body-sm text-body-sm text-outline">${t("gettingLocation")}</p>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = state.nearbyMosques.map((m, i) => {
+    const dist = formatDistance(m.distance);
+    const dir = state.qiblaBearing != null
+      ? relativeDirection(m.bearing, state.qiblaBearing)
+      : Math.round(m.bearing) + "°";
+    const iconDir = dir.includes("R") ? "north_east" : dir.includes("L") ? "north_west" : "explore";
+
+    return `
+      <div class="group bg-surface-container-lowest rounded-xl p-stack-md border border-outline-variant/20 flex gap-stack-md items-center active:scale-[0.98] transition-transform duration-200 cursor-pointer">
+        <div class="w-16 h-16 rounded-xl bg-primary-container/20 flex items-center justify-center flex-shrink-0">
+          <span class="material-symbols-outlined text-primary text-3xl" style="font-variation-settings: 'FILL' 1;">mosque</span>
+        </div>
+        <div class="flex-grow min-w-0">
+          <div class="flex justify-between items-start mb-1">
+            <h3 class="font-title-md text-title-md text-on-surface group-hover:text-primary transition-colors">${m.name}</h3>
+            <span class="font-label-caps text-[10px] text-on-secondary-container uppercase font-bold px-1.5 py-0.5 bg-secondary-container/40 rounded flex-shrink-0 ml-2">${t("open")}</span>
+          </div>
+          <div class="flex items-center gap-3 flex-wrap">
+            <span class="font-mono-tech text-mono-tech text-outline flex items-center gap-1">
+              <span class="material-symbols-outlined text-sm">location_on</span> ${dist}
+            </span>
+            <span class="font-mono-tech text-mono-tech text-primary flex items-center gap-1">
+              <span class="material-symbols-outlined text-sm">${iconDir}</span> ${dir}
+            </span>
+          </div>
+        </div>
+        <span class="material-symbols-outlined text-outline-variant">chevron_right</span>
+      </div>`;
+  }).join("");
+}
+
 /* ==========================================================================
-   6. AR VIEW
+   8. AR VIEW
    ========================================================================== */
 
 function renderARView(state) {
-  // Update AR compass strip bearing display
   const arBearing = document.getElementById("ar-bearing-display");
   if (arBearing && state.qiblaBearing != null) {
     arBearing.textContent = Math.round(state.qiblaBearing) + "°";
   }
 
-  // Update AR heading label
   const arHeading = document.getElementById("ar-heading-label");
   if (arHeading && state.heading != null) {
-    arHeading.textContent = Math.round(state.heading) + "°";
+    arHeading.textContent = Math.round(state.heading) + "° " + compassLabel(state.heading);
   }
 
-  // Update compass strip rotation
+  // Compass strip translation
   const compassStrip = document.getElementById("compass-strip");
   if (compassStrip && state.heading != null) {
-    compassStrip.style.transform = `translateX(${-state.heading * 0.5}px)`;
+    // Translate the strip so the heading value is centered
+    compassStrip.style.transform = `translateX(${-state.heading * 2}px)`;
   }
 
-  // Render floating mosque tags in AR view
+  // AR Qibla marker position — move marker left/right based on bearing offset from heading
+  const arMarker = document.getElementById("ar-qibla-marker");
+  if (arMarker && state.qiblaBearing != null && state.heading != null) {
+    let offset = state.qiblaBearing - state.heading;
+    if (offset > 180) offset -= 360;
+    if (offset < -180) offset += 360;
+
+    // Map offset (-80 to 80) to horizontal position (5% to 95%)
+    const xPos = 50 + (offset / 80) * 45;
+    const visible = Math.abs(offset) <= 80;
+
+    arMarker.style.left = xPos + "%";
+    arMarker.style.opacity = visible ? "1" : "0.15";
+    arMarker.style.transform = `translate(-50%, -50%) scale(${visible ? 1 : 0.6})`;
+  }
+
   renderARMosqueTags(state);
 }
 
-/**
- * Render floating masjid tags positioned by bearing relative to heading.
- * Tags appear at horizontal positions based on their angular offset from
- * the user's current heading, giving an AR-like overlay effect.
- */
 function renderARMosqueTags(state) {
   const container = document.getElementById("ar-mosque-tags");
   if (!container) return;
 
-  if (!state.position || state.nearbyMosques.length === 0) {
+  if (!state.position || state.nearbyMosques.length === 0 || state.heading == null) {
     container.innerHTML = "";
     return;
   }
 
-  const heading = state.heading || 0;
+  const heading = state.heading;
 
   container.innerHTML = state.nearbyMosques.slice(0, 4).map((m, i) => {
-    // Angular offset from current heading, normalised to -180..180
     let offset = m.bearing - heading;
     if (offset > 180) offset -= 360;
     if (offset < -180) offset += 360;
 
-    // Only show mosques within ±80° of current view
     if (Math.abs(offset) > 80) return "";
 
-    // Map offset to horizontal position (percentage from center)
-    const xPos = 50 + (offset / 80) * 40; // 10% – 90%
-    // Scale and opacity based on distance
-    const scale = Math.max(0.6, 1 - m.distance * 0.15);
-    const opacity = Math.max(0.4, 1 - m.distance * 0.2);
-    const yPos = 40 + (i % 2) * 12; // stagger vertically
+    const xPos = 50 + (offset / 80) * 45;
+    const scale = Math.max(0.7, 1 - m.distance * 0.1);
+    const opacity = Math.max(0.5, 1 - m.distance * 0.15);
+    const yPos = 30 + (i % 3) * 15;
 
     return `
-      <div class="absolute floating-tag flex flex-col items-center gap-2" style="left:${xPos}%;top:${yPos}%;transform:translate(-50%,0) scale(${scale});opacity:${opacity};animation-delay:${-i * 1.2}s;">
+      <div class="absolute floating-tag flex flex-col items-center gap-2 pointer-events-auto" style="left:${xPos}%;top:${yPos}%;transform:translate(-50%,0) scale(${scale});opacity:${opacity};animation-delay:${-i * 1.2}s;">
         <div class="w-10 h-10 glass-panel border border-white/30 rounded-full flex items-center justify-center shadow-lg">
           <span class="material-symbols-outlined text-primary text-[18px]" style="font-variation-settings:'FILL' 1;">location_on</span>
         </div>
         <div class="glass-panel px-stack-md py-stack-sm rounded-xl border border-white/20 shadow-xl min-w-[120px] text-center">
           <p class="font-title-md text-body-sm text-on-surface font-semibold truncate">${m.name}</p>
-          <p class="font-mono-tech text-label-caps text-primary opacity-80">${formatDistance(m.distance)} away</p>
+          <p class="font-mono-tech text-label-caps text-primary opacity-80">${formatDistance(m.distance)}</p>
         </div>
       </div>`;
   }).join("");
 }
 
 /* ==========================================================================
-   7. INITIALIZATION
+   9. INITIALIZATION
    ========================================================================== */
 
 function init() {
-  // Set up UI bindings (SPA navigation, buttons, toggles)
   initUIBindings();
-
-  // Subscribe render to state changes
+  applyTranslations();
   AppState.on(render);
-
-  // Start geolocation
   initGeolocation();
-
-  // Start compass
   initOrientation();
-
-  // Initial render
   render(AppState);
 }
 
-// Boot when DOM is ready
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", init);
 } else {

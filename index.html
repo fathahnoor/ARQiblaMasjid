@@ -109,9 +109,7 @@
   <link href="app.css" rel="stylesheet"/>
 
   <style>
-    body {
-      min-height: max(884px, 100dvh);
-    }
+    body { min-height: max(884px, 100dvh); }
   </style>
 </head>
 
@@ -126,9 +124,14 @@
     <header class="fixed top-0 w-full z-50 bg-surface/80 dark:bg-surface-dim/80 backdrop-blur-xl border-b border-outline-variant/30 px-container-margin py-stack-md flex justify-between items-center">
       <div class="flex flex-col">
         <h1 class="font-headline-lg-mobile text-headline-lg-mobile font-bold text-primary">ARQiblaMasjid</h1>
-        <p class="font-label-caps text-[10px] text-outline uppercase tracking-wider">AR Qibla &amp; Mosque Finder</p>
+        <p data-i18n="appSubtitle" class="font-label-caps text-[10px] text-outline uppercase tracking-wider">AR Qibla &amp; Mosque Finder</p>
       </div>
-      <div class="flex gap-4">
+      <div class="flex gap-2 items-center">
+        <!-- Language Toggle -->
+        <button id="lang-toggle"
+                class="px-2.5 py-1 rounded-full border border-outline-variant/40 bg-surface-container-high/60 font-label-caps text-label-caps text-primary font-bold active:scale-95 transition-all duration-150">
+          <span data-i18n="langToggle">ID</span>
+        </button>
         <button data-open-settings class="p-2 rounded-full hover:bg-surface-container-high/50 transition-colors active:scale-95 duration-200">
           <span class="material-symbols-outlined text-on-surface-variant">settings</span>
         </button>
@@ -137,30 +140,31 @@
 
     <main class="pt-24 px-container-margin flex flex-col gap-stack-lg">
 
-      <!-- Permissions / Location Status Card -->
+      <!-- Location Status Card -->
       <section id="geo-status-card"
                class="bg-surface-container-lowest rounded-xl p-stack-md border border-outline-variant/20 flex items-center justify-between shadow-sm">
         <div class="flex items-center gap-3">
-          <div id="geo-status-icon-wrap" class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center">
+          <div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center">
             <span id="geo-status-icon" class="material-symbols-outlined text-on-secondary-container" style="font-variation-settings: 'FILL' 1;">hourglass_empty</span>
           </div>
           <div>
-            <h3 id="geo-location-text" class="font-title-md text-title-md text-on-surface">Waiting for location…</h3>
-            <p id="geo-location-sub" class="font-body-sm text-body-sm text-outline">Requesting GPS permission</p>
+            <h3 id="geo-location-text" data-i18n="waitingLocation" class="font-title-md text-title-md text-on-surface">Waiting for location…</h3>
+            <p id="geo-location-sub" data-i18n="requestingGps" class="font-body-sm text-body-sm text-outline">Requesting GPS permission</p>
           </div>
         </div>
         <span id="geo-status-badge"
               class="font-mono-tech text-mono-tech bg-surface-container-high text-on-surface-variant px-2 py-1 rounded-full badge-pulse">WAITING</span>
       </section>
 
-      <!-- iOS sensor permission banner (hidden by default, shown via JS) -->
+      <!-- iOS sensor permission banner -->
       <div id="sensor-permission-banner"
            class="hidden bg-surface-container-high rounded-xl p-stack-md border border-outline-variant/20 flex items-center justify-between">
         <div class="flex items-center gap-3">
           <span class="material-symbols-outlined text-secondary">sensors</span>
-          <p class="font-body-sm text-body-sm text-on-surface-variant">Enable compass sensor for accurate Qibla direction.</p>
+          <p data-i18n="enableCompass" class="font-body-sm text-body-sm text-on-surface-variant">Enable compass sensor for accurate Qibla direction.</p>
         </div>
         <button id="btn-request-sensor"
+                data-i18n="enable"
                 class="bg-primary text-on-primary font-label-caps text-label-caps px-3 py-1.5 rounded-full active:scale-95 transition-transform">
           Enable
         </button>
@@ -169,7 +173,6 @@
       <!-- Qibla Compass Card -->
       <section class="relative bg-surface-container-lowest rounded-xl p-stack-lg border border-outline-variant/20 overflow-hidden shadow-sm">
         <div class="flex flex-col items-center gap-stack-lg">
-
           <div class="relative w-64 h-64 flex items-center justify-center">
 
             <!-- North pointer -->
@@ -194,7 +197,7 @@
             <!-- Center degree display -->
             <div class="absolute flex flex-col items-center text-center">
               <span id="compass-deg-display" class="font-display-qibla text-display-qibla text-primary">--°</span>
-              <div class="font-label-caps text-label-caps text-outline uppercase">Qibla</div>
+              <div data-i18n="qibla" class="font-label-caps text-label-caps text-outline uppercase">Qibla</div>
             </div>
           </div>
 
@@ -207,32 +210,29 @@
           <!-- Ka'bah distance & margin -->
           <div class="w-full flex justify-between items-end border-t border-outline-variant/10 pt-stack-md">
             <div class="flex flex-col gap-1">
-              <p class="font-body-sm text-body-sm text-outline">Distance to Ka'bah</p>
+              <p data-i18n="distanceToKabah" class="font-body-sm text-body-sm text-outline">Distance to Ka'bah</p>
               <p id="kabah-distance" class="font-title-md text-title-md text-on-surface">--</p>
             </div>
             <div class="flex flex-col items-end gap-2">
-              <span id="qibla-margin" class="bg-surface-container-high text-on-surface-variant font-mono-tech text-mono-tech px-2 py-1 rounded">± 3° approx.</span>
+              <span id="qibla-margin" class="bg-surface-container-high text-on-surface-variant font-mono-tech text-mono-tech px-2 py-1 rounded">± 3°</span>
             </div>
           </div>
         </div>
-
-        <!-- Atmospheric blur element -->
         <div class="absolute -bottom-10 -right-10 w-40 h-40 bg-primary/5 rounded-full blur-3xl"></div>
       </section>
 
       <!-- Nearby Masjids -->
       <section class="flex flex-col gap-stack-md">
         <div class="flex justify-between items-center">
-          <h2 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">Nearby Masjids</h2>
+          <h2 data-i18n="nearbyMasjids" class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">Nearby Masjids</h2>
           <span class="flex items-center gap-1 px-3 py-1.5 rounded-full border border-outline-variant/30 bg-surface text-on-surface-variant">
             <span class="material-symbols-outlined text-lg">distance</span>
-            <span id="mosque-radius-label" class="font-label-caps text-label-caps">Radius: 2 km</span>
+            <span data-i18n="radius" class="font-label-caps text-label-caps">Radius</span>: <span class="font-label-caps text-label-caps">2 km</span>
           </span>
         </div>
         <div id="mosque-list" class="flex flex-col gap-stack-sm">
-          <!-- Populated by app.js -->
           <div class="bg-surface-container-lowest rounded-xl p-stack-md border border-outline-variant/20 text-center">
-            <p class="font-body-sm text-body-sm text-outline">Loading mosques…</p>
+            <p data-i18n="gettingLocation" class="font-body-sm text-body-sm text-outline">Getting your location…</p>
           </div>
         </div>
       </section>
@@ -242,6 +242,7 @@
     <!-- Fixed CTA: Enter AR View -->
     <div class="fixed bottom-24 left-1/2 -translate-x-1/2 w-full max-w-md px-container-margin z-40">
       <button data-enter-ar
+              data-i18n="enterArView"
               class="w-full bg-primary text-on-primary font-title-md text-title-md py-4 rounded-full shadow-lg active:scale-95 transition-all duration-200 flex items-center justify-center gap-3 group">
         <span class="material-symbols-outlined group-hover:rotate-12 transition-transform">view_in_ar</span>
         Enter AR View
@@ -250,24 +251,20 @@
 
     <!-- Bottom Navigation Bar -->
     <nav id="bottom-nav" class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 py-3 pb-safe bg-surface/90 dark:bg-inverse-surface/90 backdrop-blur-lg border-t border-outline-variant/20 z-50 rounded-t-xl">
-      <!-- Qibla (Active) -->
       <button data-nav-home
               class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-4 py-1 active:scale-90 transition-all duration-150 cursor-pointer">
         <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">near_me</span>
-        <span class="font-label-caps text-label-caps">Qibla</span>
+        <span data-i18n="qibla" class="font-label-caps text-label-caps">Qibla</span>
       </button>
-      <!-- Masjids -->
       <button data-nav-masjids
               class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant/40 rounded-full px-4 py-1 active:scale-90 transition-all duration-150 cursor-pointer">
         <span class="material-symbols-outlined">mosque</span>
         <span class="font-label-caps text-label-caps">Masjids</span>
       </button>
-      <!-- Saved -->
       <button class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant/40 rounded-full px-4 py-1 active:scale-90 transition-all duration-150 cursor-pointer">
         <span class="material-symbols-outlined">bookmark</span>
         <span class="font-label-caps text-label-caps">Saved</span>
       </button>
-      <!-- Settings -->
       <button data-nav-settings
               class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant/40 rounded-full px-4 py-1 active:scale-90 transition-all duration-150 cursor-pointer">
         <span class="material-symbols-outlined">tune</span>
@@ -279,19 +276,84 @@
 
 
   <!-- ================================================================
+       SCREEN: MASJIDS (dedicated list)
+       ================================================================ -->
+  <section data-screen="masjids" class="min-h-screen pb-32 hidden">
+
+    <!-- TopAppBar -->
+    <header class="fixed top-0 w-full z-50 bg-surface/80 dark:bg-surface-dim/80 backdrop-blur-xl border-b border-outline-variant/30 px-container-margin py-stack-md flex justify-between items-center">
+      <div class="flex flex-col">
+        <h1 data-i18n="allMasjids" class="font-headline-lg-mobile text-headline-lg-mobile font-bold text-primary">All Masjids</h1>
+        <p data-i18n="allMasjidsDesc" class="font-label-caps text-[10px] text-outline uppercase tracking-wider">Mosques nearby your location</p>
+      </div>
+      <button id="lang-toggle-masjids"
+              class="px-2.5 py-1 rounded-full border border-outline-variant/40 bg-surface-container-high/60 font-label-caps text-label-caps text-primary font-bold active:scale-95 transition-all duration-150">
+        <span data-i18n="langToggle">ID</span>
+      </button>
+    </header>
+
+    <main class="pt-24 px-container-margin flex flex-col gap-stack-lg">
+      <!-- Radius filter -->
+      <div class="flex justify-between items-center">
+        <span class="flex items-center gap-1 px-3 py-1.5 rounded-full border border-outline-variant/30 bg-surface text-on-surface-variant">
+          <span class="material-symbols-outlined text-lg">distance</span>
+          <span data-i18n="radius" class="font-label-caps text-label-caps">Radius</span>: <span class="font-label-caps text-label-caps">2 km</span>
+        </span>
+      </div>
+
+      <!-- Mosque list -->
+      <div id="masjids-screen-list" class="flex flex-col gap-stack-sm">
+        <div class="bg-surface-container-lowest rounded-xl p-stack-lg border border-outline-variant/20 text-center">
+          <span class="material-symbols-outlined text-outline text-4xl mb-2">location_searching</span>
+          <p data-i18n="gettingLocation" class="font-body-sm text-body-sm text-outline">Getting your location…</p>
+        </div>
+      </div>
+    </main>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 py-3 pb-safe bg-surface/90 dark:bg-inverse-surface/90 backdrop-blur-lg border-t border-outline-variant/20 z-50 rounded-t-xl">
+      <button data-nav-home
+              class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant/40 rounded-full px-4 py-1 active:scale-90 transition-all duration-150 cursor-pointer">
+        <span class="material-symbols-outlined mb-1">near_me</span>
+        <span data-i18n="qibla" class="font-label-caps text-label-caps">Qibla</span>
+      </button>
+      <button data-nav-masjids
+              class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-4 py-1 active:scale-90 transition-all duration-150 cursor-pointer">
+        <span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 1;">mosque</span>
+        <span class="font-label-caps text-label-caps">Masjids</span>
+      </button>
+      <button class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant/40 rounded-full px-4 py-1 active:scale-90 transition-all duration-150 cursor-pointer">
+        <span class="material-symbols-outlined mb-1">bookmark</span>
+        <span class="font-label-caps text-label-caps">Saved</span>
+      </button>
+      <button data-nav-settings
+              class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant/40 rounded-full px-4 py-1 active:scale-90 transition-all duration-150 cursor-pointer">
+        <span class="material-symbols-outlined mb-1">tune</span>
+        <span class="font-label-caps text-label-caps">Settings</span>
+      </button>
+    </nav>
+
+  </section>
+
+
+  <!-- ================================================================
        SCREEN: AR VIEW
        ================================================================ -->
-  <section data-screen="ar"
-           class="min-h-screen w-full relative flex-col hidden">
+  <section data-screen="ar" class="min-h-screen w-full relative flex-col hidden">
 
-    <!-- Fullscreen AR Camera Background -->
-    <div class="fixed inset-0 z-0 overflow-hidden">
-      <div id="ar-camera-feed"
+    <!-- AR Camera Background -->
+    <div class="fixed inset-0 z-0 overflow-hidden bg-black">
+      <!-- Live camera feed (shown when available) -->
+      <video id="ar-camera-video"
+             class="hidden w-full h-full object-cover"
+             autoplay playsinline muted></video>
+      <!-- Fallback static image (shown when camera unavailable) -->
+      <div id="ar-camera-fallback"
            class="w-full h-full bg-cover bg-center brightness-75 scale-110"
            style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBDIpu4CbkbceANgBkwk1x4GJmbVCZHf9D71h9qIV51y4evHb2Ewy_0uaxylsJhP59F7m0SMgOxqwL9H1tFGYMIXzgDK7Ln4T4tEaDHvpYg1FLSYOC8zrlYi6rieN8l4Eggq5bBR2wHZFhweOzykfcGS8Q1-l0Iop9MYXGxJCMnFgpUGFHzhdlBA3VaRSgrvZ4LyI1Z67X8wBd1gCzG_zuG7wBJ5uYExY5QKWOTW1bptzOF8vBfk0_66MLC0dFNzqqpbhO8USeBpA')"></div>
     </div>
 
-    <!-- Top Overlay (Status & Navigation) -->
+    <!-- Top Overlay -->
     <header class="fixed top-0 left-0 w-full z-50 px-container-margin py-stack-md flex items-center justify-between pointer-events-none">
       <div class="flex items-center gap-stack-md pointer-events-auto">
         <button data-back-ar
@@ -300,12 +362,12 @@
         </button>
       </div>
       <div class="glass-panel px-stack-lg py-2 rounded-full border border-white/20 shadow-sm pointer-events-auto">
-        <p id="ar-instruction" class="font-label-caps text-label-caps text-primary tracking-wider uppercase">Align your phone to find Qibla</p>
+        <p data-i18n="alignPhone" id="ar-instruction" class="font-label-caps text-label-caps text-primary tracking-wider uppercase">Align your phone to find Qibla</p>
       </div>
       <div class="w-10 h-10 pointer-events-none"></div>
     </header>
 
-    <!-- AR Canvas / Horizon Layer -->
+    <!-- AR Canvas -->
     <main class="absolute inset-0 z-10 flex items-center justify-center pointer-events-none overflow-hidden">
 
       <!-- Horizon Line -->
@@ -315,34 +377,33 @@
       <div class="absolute top-[55%] left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 tilt-indicator opacity-80">
         <div class="flex items-center gap-2 px-3 py-1 bg-on-surface/10 rounded-full backdrop-blur-md">
           <span class="material-symbols-outlined text-white text-[16px]">screen_rotation</span>
-          <span class="font-mono-tech text-mono-tech text-white">Level Your Phone</span>
+          <span data-i18n="levelPhone" class="font-mono-tech text-mono-tech text-white">Level Your Phone</span>
         </div>
       </div>
 
-      <!-- Center: Qibla Marker -->
-      <div class="relative flex flex-col items-center transition-all duration-500 transform scale-100">
+      <!-- Center: Qibla Marker (moves horizontally based on bearing offset) -->
+      <div id="ar-qibla-marker"
+           class="absolute top-1/2 left-1/2 flex flex-col items-center transition-all duration-300 ease-out pointer-events-none"
+           style="transform: translate(-50%, -50%);">
         <div class="relative w-48 h-48 flex items-center justify-center">
-          <!-- Glowing outer rings -->
           <div class="absolute inset-0 border-2 border-secondary-fixed/30 rounded-full ar-hit-zone"></div>
           <div class="absolute inset-4 border border-secondary-fixed/50 rounded-full"></div>
-          <!-- Main icon circle -->
           <div class="z-20 w-24 h-24 bg-primary rounded-full shadow-2xl flex items-center justify-center border-4 border-secondary-fixed/20">
             <span class="material-symbols-outlined text-white text-[48px]" style="font-variation-settings: 'FILL' 1;">mosque</span>
           </div>
-          <!-- Direction pointer -->
           <div class="absolute top-[-40px] flex flex-col items-center">
             <div class="w-1 h-10 bg-gradient-to-t from-secondary-fixed to-transparent rounded-full"></div>
           </div>
         </div>
         <div class="mt-4 flex flex-col items-center gap-1">
-          <h2 class="font-headline-lg-mobile text-headline-lg-mobile text-white drop-shadow-md">Qibla</h2>
-          <div id="ar-bearing-tag" class="px-3 py-1 bg-secondary-container rounded-lg shadow-sm">
+          <h2 data-i18n="qibla" class="font-headline-lg-mobile text-headline-lg-mobile text-white drop-shadow-md">Qibla</h2>
+          <div class="px-3 py-1 bg-secondary-container rounded-lg shadow-sm">
             <p id="ar-bearing-display" class="font-mono-tech text-mono-tech text-on-secondary-container">--°</p>
           </div>
         </div>
       </div>
 
-      <!-- Floating masjid tags (populated dynamically by app.js) -->
+      <!-- Floating masjid tags -->
       <div id="ar-mosque-tags"></div>
 
     </main>
@@ -352,44 +413,45 @@
       <div class="px-container-margin mb-stack-lg flex justify-center">
         <span class="pointer-events-auto inline-flex items-center gap-2 bg-inverse-surface/80 text-inverse-on-surface px-4 py-1.5 rounded-full font-label-caps text-label-caps backdrop-blur-md">
           <span class="material-symbols-outlined text-[14px]">science</span>
-          AR Mode: Experimental
+          <span data-i18n="arModeExperimental">AR Mode: Experimental</span>
         </span>
       </div>
-      <!-- Compass & Info Drawer Strip -->
+      <!-- Compass Strip -->
       <div class="pointer-events-auto glass-panel rounded-t-3xl border-t border-white/30 shadow-[0_-8px_30px_rgba(0,0,0,0.1)] px-container-margin py-stack-lg">
-        <!-- Dynamic Compass Strip -->
         <div class="relative w-full h-12 mb-stack-md flex items-center overflow-hidden">
           <div id="compass-strip"
-               class="absolute inset-0 flex items-center justify-center gap-12 text-on-surface/40 font-mono-tech text-label-caps tracking-widest transition-transform duration-300">
+               class="absolute inset-0 flex items-center justify-center gap-12 text-white/50 font-mono-tech text-label-caps tracking-widest transition-transform duration-200">
             <span>W</span>
-            <span id="ar-heading-label" class="text-primary font-bold text-[16px]">--°</span>
+            <span>270</span>
             <span>NW</span>
-            <span>330</span>
+            <span>315</span>
             <span>N</span>
-            <span>030</span>
+            <span class="text-secondary-fixed font-bold text-[16px]" id="ar-heading-label">--°</span>
+            <span>045</span>
             <span>NE</span>
+            <span>090</span>
+            <span>E</span>
           </div>
-          <!-- Center indicator -->
-          <div class="absolute left-1/2 -translate-x-1/2 w-0.5 h-8 bg-primary z-10"></div>
+          <div class="absolute left-1/2 -translate-x-1/2 w-0.5 h-8 bg-secondary-fixed z-10"></div>
         </div>
         <!-- Quick Action Cards -->
         <div class="grid grid-cols-2 gap-stack-md">
-          <button class="bg-surface-container-highest/60 hover:bg-surface-container-highest transition-colors rounded-2xl p-stack-md flex items-center gap-stack-md group">
+          <button class="bg-white/10 hover:bg-white/20 transition-colors rounded-2xl p-stack-md flex items-center gap-stack-md group">
             <div class="w-10 h-10 rounded-xl bg-primary-container text-on-primary-container flex items-center justify-center group-active:scale-90 transition-transform">
               <span class="material-symbols-outlined">directions</span>
             </div>
             <div class="text-left">
-              <p class="font-label-caps text-label-caps text-on-surface-variant">Get Path</p>
-              <p class="font-title-md text-body-sm font-bold text-on-surface">Navigate</p>
+              <p data-i18n="getPath" class="font-label-caps text-label-caps text-white/60">Get Path</p>
+              <p data-i18n="navigate" class="font-title-md text-body-sm font-bold text-white">Navigate</p>
             </div>
           </button>
-          <button class="bg-surface-container-highest/60 hover:bg-surface-container-highest transition-colors rounded-2xl p-stack-md flex items-center gap-stack-md group">
+          <button class="bg-white/10 hover:bg-white/20 transition-colors rounded-2xl p-stack-md flex items-center gap-stack-md group">
             <div class="w-10 h-10 rounded-xl bg-tertiary-container text-tertiary-fixed flex items-center justify-center group-active:scale-90 transition-transform">
               <span class="material-symbols-outlined">map</span>
             </div>
             <div class="text-left">
-              <p class="font-label-caps text-label-caps text-on-surface-variant">Switch to</p>
-              <p class="font-title-md text-body-sm font-bold text-on-surface">2D Map</p>
+              <p data-i18n="switchTo" class="font-label-caps text-label-caps text-white/60">Switch to</p>
+              <p data-i18n="map2d" class="font-title-md text-body-sm font-bold text-white">2D Map</p>
             </div>
           </button>
         </div>
@@ -429,15 +491,15 @@
               <div class="absolute left-10 bottom-0 w-24 h-24 rounded-full border-[4px] border-surface"></div>
             </div>
             <div class="absolute inset-0 flex items-center px-stack-md">
-              <h2 class="text-on-primary font-headline-lg text-headline-lg">Settings &amp; Info</h2>
+              <h2 data-i18n="settingsAndInfo" class="text-on-primary font-headline-lg text-headline-lg">Settings &amp; Info</h2>
             </div>
           </div>
           <div class="p-stack-md space-y-stack-md">
             <div class="flex items-start gap-stack-sm">
               <span class="material-symbols-outlined text-primary">info</span>
               <div>
-                <h3 class="font-title-md text-title-md text-on-surface">About ARQiblaMasjid</h3>
-                <p class="font-body-sm text-body-sm text-on-surface-variant mt-1 leading-relaxed">
+                <h3 data-i18n="aboutTitle" class="font-title-md text-title-md text-on-surface">About ARQiblaMasjid</h3>
+                <p data-i18n="aboutDesc" class="font-body-sm text-body-sm text-on-surface-variant mt-1 leading-relaxed">
                   A modern tool for the global Muslim community, combining AR technology with traditional needs.
                   Designed for precision, privacy, and peace of mind.
                 </p>
@@ -446,59 +508,57 @@
           </div>
         </section>
 
-        <!-- Calibration & Accuracy Section -->
+        <!-- Calibration & Accuracy -->
         <section class="bg-surface rounded-xl p-stack-md border border-outline-variant/20 space-y-stack-md">
           <div class="flex items-center gap-stack-sm border-b border-outline-variant/20 pb-stack-sm">
             <span class="material-symbols-outlined text-secondary">compass_calibration</span>
-            <h3 class="font-title-md text-title-md text-on-surface">Calibration &amp; Accuracy</h3>
+            <h3 data-i18n="calibrationTitle" class="font-title-md text-title-md text-on-surface">Calibration &amp; Accuracy</h3>
           </div>
           <div class="space-y-stack-sm">
             <p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
-              For the most precise results, calibrate your phone's compass by moving it in a smooth
-              <span class="font-semibold text-primary">figure-8 motion</span> in the air.
+              <span data-i18n="calibrationDesc1">For the most precise results, calibrate your phone's compass by moving it in a smooth</span>
+              <span class="font-semibold text-primary" data-i18n="calibrationDesc2">figure-8 motion</span>
+              <span data-i18n="calibrationDesc3">in the air.</span>
             </p>
-            <p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+            <p data-i18n="calibrationNote" class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
               A slight difference of a few degrees in Qibla direction is still within acceptable tolerance
               according to many scholars and astronomers. Do not worry about very small deviations.
             </p>
             <div class="bg-surface-container-low p-stack-sm rounded-lg flex gap-stack-sm items-center border border-outline-variant/10">
               <span class="material-symbols-outlined text-error text-[20px]">warning</span>
-              <p class="font-mono-tech text-mono-tech text-on-surface-variant">
+              <p data-i18n="electromagneticWarning" class="font-mono-tech text-mono-tech text-on-surface-variant">
                 Note: Electromagnetic interference from nearby metal or electronics can affect results.
               </p>
             </div>
           </div>
         </section>
 
-        <!-- Toggle Settings Section -->
+        <!-- Toggle Settings -->
         <section class="bg-surface rounded-xl border border-outline-variant/20 divide-y divide-outline-variant/20">
-          <!-- Push Notifications -->
           <div class="p-stack-md flex items-center justify-between">
             <div class="flex items-center gap-stack-sm">
               <span class="material-symbols-outlined text-on-surface-variant">notifications</span>
-              <span class="font-title-md text-title-md text-on-surface">Push Notifications</span>
+              <span data-i18n="pushNotifications" class="font-title-md text-title-md text-on-surface">Push Notifications</span>
             </div>
             <label class="switch-toggle">
               <input type="checkbox" checked/>
               <span class="slider rounded-full"></span>
             </label>
           </div>
-          <!-- Metric Units -->
           <div class="p-stack-md flex items-center justify-between">
             <div class="flex items-center gap-stack-sm">
               <span class="material-symbols-outlined text-on-surface-variant">straighten</span>
-              <span class="font-title-md text-title-md text-on-surface">Use Metric Units</span>
+              <span data-i18n="metricUnits" class="font-title-md text-title-md text-on-surface">Use Metric Units</span>
             </div>
             <label class="switch-toggle">
               <input type="checkbox" checked/>
               <span class="slider rounded-full"></span>
             </label>
           </div>
-          <!-- Dark Mode -->
           <div class="p-stack-md flex items-center justify-between">
             <div class="flex items-center gap-stack-sm">
               <span class="material-symbols-outlined text-on-surface-variant">dark_mode</span>
-              <span class="font-title-md text-title-md text-on-surface">Dark Mode</span>
+              <span data-i18n="darkMode" class="font-title-md text-title-md text-on-surface">Dark Mode</span>
             </div>
             <label class="switch-toggle">
               <input id="dark-mode-toggle" type="checkbox"/>
@@ -507,27 +567,28 @@
           </div>
         </section>
 
-        <!-- Privacy Section -->
+        <!-- Privacy -->
         <section class="bg-surface rounded-xl p-stack-md border border-outline-variant/20 space-y-stack-md">
           <div class="flex items-center gap-stack-sm border-b border-outline-variant/20 pb-stack-sm">
             <span class="material-symbols-outlined text-primary">security</span>
-            <h3 class="font-title-md text-title-md text-on-surface">Privacy</h3>
+            <h3 data-i18n="privacyTitle" class="font-title-md text-title-md text-on-surface">Privacy</h3>
           </div>
           <p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
-            Your location is processed <span class="font-semibold text-primary">locally on-device</span>
-            to calculate bearings and find nearby mosques. We do not store or transmit your precise coordinates.
+            <span data-i18n="privacyDesc">Your location is processed</span>
+            <span class="font-semibold text-primary" data-i18n="privacyDescBold">locally on-device</span>
+            <span data-i18n="privacyDesc2">to calculate bearings and find nearby mosques. We do not store or transmit your precise coordinates.</span>
           </p>
           <div class="pt-2">
-            <button class="text-primary font-label-caps text-label-caps hover:underline flex items-center gap-1">
+            <button data-i18n="viewPrivacyPolicy" class="text-primary font-label-caps text-label-caps hover:underline flex items-center gap-1">
               VIEW FULL PRIVACY POLICY
               <span class="material-symbols-outlined text-[14px]">open_in_new</span>
             </button>
           </div>
         </section>
 
-        <!-- Version Info -->
+        <!-- Version -->
         <div class="text-center py-stack-md">
-          <p class="font-mono-tech text-mono-tech text-outline">v1.0.0 (Build 1)</p>
+          <p data-i18n="version" class="font-mono-tech text-mono-tech text-outline">v1.0.0</p>
         </div>
 
       </div>
@@ -538,7 +599,7 @@
       <button data-nav-home
               class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-variant/40 active:scale-90 transition-all duration-150">
         <span class="material-symbols-outlined mb-1">near_me</span>
-        <span class="font-label-caps text-label-caps">Qibla</span>
+        <span data-i18n="qibla" class="font-label-caps text-label-caps">Qibla</span>
       </button>
       <button data-nav-masjids
               class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-variant/40 active:scale-90 transition-all duration-150">
@@ -564,7 +625,7 @@
        ================================================================ -->
   <script src="app.js"></script>
 
-  <!-- AR Particles micro-interaction (from ar_overlay_view stitch) -->
+  <!-- AR Particles micro-interaction -->
   <script>
     (function() {
       var particlesContainer = document.getElementById('particles');
@@ -580,16 +641,6 @@
         p.style.opacity = Math.random() * 0.5;
         particlesContainer.appendChild(p);
       }
-
-      // Mouse/touch parallax for AR floating tags
-      document.addEventListener('mousemove', function(e) {
-        var moveX = (e.clientX / window.innerWidth - 0.5) * 40;
-        var tags = document.querySelectorAll('.floating-tag');
-        tags.forEach(function(tag, idx) {
-          var speed = (idx + 1) * 0.5;
-          tag.style.transform = 'translate(' + (moveX * speed) + 'px, 0)';
-        });
-      });
     })();
   </script>
 
