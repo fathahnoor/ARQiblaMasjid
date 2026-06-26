@@ -1,0 +1,7 @@
+node_modules/
+.DS_Store
+*.zip
+stitch_arqiblamasjid_ar_ui/ar_overlay_view/
+stitch_arqiblamasjid_ar_ui/dashboard_qibla_masjids/
+stitch_arqiblamasjid_ar_ui/settings_privacy/
+stitch_arqiblamasjid_ar_ui/horizon_qibla/

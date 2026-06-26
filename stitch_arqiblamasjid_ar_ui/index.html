@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <title>ARQiblaMasjid - AR Qibla &amp; Mosque Finder</title>
+
+  <!-- Tailwind CSS (Stitch convention) -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "secondary-fixed": "#7df7e5",
+            "outline": "#6e7976",
+            "secondary-fixed-dim": "#5edac9",
+            "tertiary-fixed": "#d6e4f2",
+            "tertiary-container": "#52606c",
+            "surface-variant": "#e1e3e2",
+            "secondary-container": "#79f4e2",
+            "on-primary-fixed-variant": "#005046",
+            "error-container": "#ffdad6",
+            "inverse-on-surface": "#eff1f0",
+            "primary-fixed-dim": "#83d5c5",
+            "inverse-surface": "#2e3131",
+            "primary-fixed": "#9ff2e1",
+            "on-error-container": "#93000a",
+            "on-primary": "#ffffff",
+            "surface-container-low": "#f2f4f3",
+            "surface-tint": "#006b5e",
+            "surface-dim": "#d8dada",
+            "surface-bright": "#f8faf9",
+            "on-primary-container": "#95e8d8",
+            "tertiary-fixed-dim": "#bac8d6",
+            "on-tertiary-fixed-variant": "#3b4854",
+            "error": "#ba1a1a",
+            "primary-container": "#006b5e",
+            "on-surface": "#191c1c",
+            "surface": "#f8faf9",
+            "on-surface-variant": "#3e4946",
+            "outline-variant": "#bec9c5",
+            "surface-container-lowest": "#ffffff",
+            "surface-container-high": "#e6e9e8",
+            "inverse-primary": "#83d5c5",
+            "on-tertiary": "#ffffff",
+            "primary": "#005147",
+            "on-background": "#191c1c",
+            "tertiary": "#3b4854",
+            "on-secondary-container": "#006f64",
+            "on-primary-fixed": "#00201b",
+            "surface-container": "#eceeed",
+            "on-tertiary-fixed": "#0f1d27",
+            "on-error": "#ffffff",
+            "on-secondary-fixed-variant": "#005048",
+            "on-tertiary-container": "#ccdae8",
+            "on-secondary-fixed": "#00201c",
+            "on-secondary": "#ffffff"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "container-margin": "20px",
+            "unit": "4px",
+            "ar-overlay-padding": "32px",
+            "stack-lg": "24px",
+            "gutter": "12px",
+            "stack-md": "16px",
+            "stack-sm": "8px"
+          },
+          "fontFamily": {
+            "label-caps": ["Geist"],
+            "body-lg": ["Inter"],
+            "title-md": ["Inter"],
+            "headline-lg-mobile": ["Inter"],
+            "display-qibla": ["Inter"],
+            "headline-lg": ["Inter"],
+            "body-sm": ["Inter"],
+            "mono-tech": ["Geist"]
+          },
+          "fontSize": {
+            "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+            "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+            "title-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+            "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+            "display-qibla": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+            "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "600"}],
+            "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+            "mono-tech": ["13px", {"lineHeight": "18px", "fontWeight": "500"}]
+          }
+        },
+      },
+    }
+  </script>
+
+  <!-- Fonts (Stitch convention) -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Geist:wght@500;600&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+
+  <!-- A-Frame for AR/WebXR -->
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+
+  <!-- Supplementary styles -->
+  <link href="app.css" rel="stylesheet"/>
+
+  <style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+
+<body class="bg-background text-on-surface font-body-lg text-body-lg antialiased">
+
+  <!-- ================================================================
+       SCREEN: HOME / DASHBOARD
+       ================================================================ -->
+  <section data-screen="home" class="screen-active min-h-screen pb-32">
+
+    <!-- TopAppBar -->
+    <header class="fixed top-0 w-full z-50 bg-surface/80 dark:bg-surface-dim/80 backdrop-blur-xl border-b border-outline-variant/30 px-container-margin py-stack-md flex justify-between items-center">
+      <div class="flex flex-col">
+        <h1 class="font-headline-lg-mobile text-headline-lg-mobile font-bold text-primary">ARQiblaMasjid</h1>
+        <p class="font-label-caps text-[10px] text-outline uppercase tracking-wider">AR Qibla &amp; Mosque Finder</p>
+      </div>
+      <div class="flex gap-4">
+        <button data-open-settings class="p-2 rounded-full hover:bg-surface-container-high/50 transition-colors active:scale-95 duration-200">
+          <span class="material-symbols-outlined text-on-surface-variant">settings</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="pt-24 px-container-margin flex flex-col gap-stack-lg">
+
+      <!-- Permissions / Location Status Card -->
+      <section id="geo-status-card"
+               class="bg-surface-container-lowest rounded-xl p-stack-md border border-outline-variant/20 flex items-center justify-between shadow-sm">
+        <div class="flex items-center gap-3">
+          <div id="geo-status-icon-wrap" class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center">
+            <span id="geo-status-icon" class="material-symbols-outlined text-on-secondary-container" style="font-variation-settings: 'FILL' 1;">hourglass_empty</span>
+          </div>
+          <div>
+            <h3 id="geo-location-text" class="font-title-md text-title-md text-on-surface">Waiting for location…</h3>
+            <p id="geo-location-sub" class="font-body-sm text-body-sm text-outline">Requesting GPS permission</p>
+          </div>
+        </div>
+        <span id="geo-status-badge"
+              class="font-mono-tech text-mono-tech bg-surface-container-high text-on-surface-variant px-2 py-1 rounded-full badge-pulse">WAITING</span>
+      </section>
+
+      <!-- iOS sensor permission banner (hidden by default, shown via JS) -->
+      <div id="sensor-permission-banner"
+           class="hidden bg-surface-container-high rounded-xl p-stack-md border border-outline-variant/20 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-secondary">sensors</span>
+          <p class="font-body-sm text-body-sm text-on-surface-variant">Enable compass sensor for accurate Qibla direction.</p>
+        </div>
+        <button id="btn-request-sensor"
+                class="bg-primary text-on-primary font-label-caps text-label-caps px-3 py-1.5 rounded-full active:scale-95 transition-transform">
+          Enable
+        </button>
+      </div>
+
+      <!-- Qibla Compass Card -->
+      <section class="relative bg-surface-container-lowest rounded-xl p-stack-lg border border-outline-variant/20 overflow-hidden shadow-sm">
+        <div class="flex flex-col items-center gap-stack-lg">
+
+          <div class="relative w-64 h-64 flex items-center justify-center">
+
+            <!-- North pointer -->
+            <div class="absolute top-0 transform -translate-y-2 flex flex-col items-center">
+              <span class="font-mono-tech text-mono-tech text-outline">N</span>
+              <div class="w-0.5 h-3 bg-outline rounded-full"></div>
+            </div>
+
+            <!-- Compass outer rings -->
+            <div class="absolute inset-0 rounded-full border border-outline-variant/30 flex items-center justify-center">
+              <div class="w-[90%] h-[90%] rounded-full border border-dashed border-outline-variant/50"></div>
+            </div>
+
+            <!-- Main Qibla indicator (rotated by JS) -->
+            <div id="compass-ring" class="compass-ring relative w-full h-full" style="transform: rotate(0deg);">
+              <div class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-4 flex flex-col items-center gap-1">
+                <span class="material-symbols-outlined text-primary text-4xl" style="font-variation-settings: 'FILL' 1;">keyboard_double_arrow_up</span>
+                <div class="w-6 h-6 bg-primary rounded-full border-4 border-white shadow-md"></div>
+              </div>
+            </div>
+
+            <!-- Center degree display -->
+            <div class="absolute flex flex-col items-center text-center">
+              <span id="compass-deg-display" class="font-display-qibla text-display-qibla text-primary">--°</span>
+              <div class="font-label-caps text-label-caps text-outline uppercase">Qibla</div>
+            </div>
+          </div>
+
+          <!-- Heading label -->
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-sm text-outline">explore</span>
+            <span id="heading-label" class="font-mono-tech text-mono-tech text-outline">--</span>
+          </div>
+
+          <!-- Ka'bah distance & margin -->
+          <div class="w-full flex justify-between items-end border-t border-outline-variant/10 pt-stack-md">
+            <div class="flex flex-col gap-1">
+              <p class="font-body-sm text-body-sm text-outline">Distance to Ka'bah</p>
+              <p id="kabah-distance" class="font-title-md text-title-md text-on-surface">--</p>
+            </div>
+            <div class="flex flex-col items-end gap-2">
+              <span id="qibla-margin" class="bg-surface-container-high text-on-surface-variant font-mono-tech text-mono-tech px-2 py-1 rounded">± 3° approx.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Atmospheric blur element -->
+        <div class="absolute -bottom-10 -right-10 w-40 h-40 bg-primary/5 rounded-full blur-3xl"></div>
+      </section>
+
+      <!-- Nearby Masjids -->
+      <section class="flex flex-col gap-stack-md">
+        <div class="flex justify-between items-center">
+          <h2 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">Nearby Masjids</h2>
+          <span class="flex items-center gap-1 px-3 py-1.5 rounded-full border border-outline-variant/30 bg-surface text-on-surface-variant">
+            <span class="material-symbols-outlined text-lg">distance</span>
+            <span id="mosque-radius-label" class="font-label-caps text-label-caps">Radius: 2 km</span>
+          </span>
+        </div>
+        <div id="mosque-list" class="flex flex-col gap-stack-sm">
+          <!-- Populated by app.js -->
+          <div class="bg-surface-container-lowest rounded-xl p-stack-md border border-outline-variant/20 text-center">
+            <p class="font-body-sm text-body-sm text-outline">Loading mosques…</p>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Fixed CTA: Enter AR View -->
+    <div class="fixed bottom-24 left-1/2 -translate-x-1/2 w-full max-w-md px-container-margin z-40">
+      <button data-enter-ar
+              class="w-full bg-primary text-on-primary font-title-md text-title-md py-4 rounded-full shadow-lg active:scale-95 transition-all duration-200 flex items-center justify-center gap-3 group">
+        <span class="material-symbols-outlined group-hover:rotate-12 transition-transform">view_in_ar</span>
+        Enter AR View
+      </button>
+    </div>
+
+    <!-- Bottom Navigation Bar -->
+    <nav id="bottom-nav" class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 py-3 pb-safe bg-surface/90 dark:bg-inverse-surface/90 backdrop-blur-lg border-t border-outline-variant/20 z-50 rounded-t-xl">
+      <!-- Qibla (Active) -->
+      <button data-nav-home
+              class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-4 py-1 active:scale-90 transition-all duration-150 cursor-pointer">
+        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">near_me</span>
+        <span class="font-label-caps text-label-caps">Qibla</span>
+      </button>
+      <!-- Masjids -->
+      <button data-nav-masjids
+              class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant/40 rounded-full px-4 py-1 active:scale-90 transition-all duration-150 cursor-pointer">
+        <span class="material-symbols-outlined">mosque</span>
+        <span class="font-label-caps text-label-caps">Masjids</span>
+      </button>
+      <!-- Saved -->
+      <button class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant/40 rounded-full px-4 py-1 active:scale-90 transition-all duration-150 cursor-pointer">
+        <span class="material-symbols-outlined">bookmark</span>
+        <span class="font-label-caps text-label-caps">Saved</span>
+      </button>
+      <!-- Settings -->
+      <button data-nav-settings
+              class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant/40 rounded-full px-4 py-1 active:scale-90 transition-all duration-150 cursor-pointer">
+        <span class="material-symbols-outlined">tune</span>
+        <span class="font-label-caps text-label-caps">Settings</span>
+      </button>
+    </nav>
+
+  </section>
+
+
+  <!-- ================================================================
+       SCREEN: AR VIEW
+       ================================================================ -->
+  <section data-screen="ar"
+           class="min-h-screen w-full relative flex-col hidden">
+
+    <!-- Fullscreen AR Camera Background -->
+    <div class="fixed inset-0 z-0 overflow-hidden">
+      <div id="ar-camera-feed"
+           class="w-full h-full bg-cover bg-center brightness-75 scale-110"
+           style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBDIpu4CbkbceANgBkwk1x4GJmbVCZHf9D71h9qIV51y4evHb2Ewy_0uaxylsJhP59F7m0SMgOxqwL9H1tFGYMIXzgDK7Ln4T4tEaDHvpYg1FLSYOC8zrlYi6rieN8l4Eggq5bBR2wHZFhweOzykfcGS8Q1-l0Iop9MYXGxJCMnFgpUGFHzhdlBA3VaRSgrvZ4LyI1Z67X8wBd1gCzG_zuG7wBJ5uYExY5QKWOTW1bptzOF8vBfk0_66MLC0dFNzqqpbhO8USeBpA')"></div>
+    </div>
+
+    <!-- Top Overlay (Status & Navigation) -->
+    <header class="fixed top-0 left-0 w-full z-50 px-container-margin py-stack-md flex items-center justify-between pointer-events-none">
+      <div class="flex items-center gap-stack-md pointer-events-auto">
+        <button data-back-ar
+                class="w-10 h-10 rounded-full glass-panel flex items-center justify-center text-on-surface active:scale-90 transition-transform">
+          <span class="material-symbols-outlined">arrow_back</span>
+        </button>
+      </div>
+      <div class="glass-panel px-stack-lg py-2 rounded-full border border-white/20 shadow-sm pointer-events-auto">
+        <p id="ar-instruction" class="font-label-caps text-label-caps text-primary tracking-wider uppercase">Align your phone to find Qibla</p>
+      </div>
+      <div class="w-10 h-10 pointer-events-none"></div>
+    </header>
+
+    <!-- AR Canvas / Horizon Layer -->
+    <main class="absolute inset-0 z-10 flex items-center justify-center pointer-events-none overflow-hidden">
+
+      <!-- Horizon Line -->
+      <div class="absolute w-full h-[1px] horizon-line top-1/2 -translate-y-1/2 opacity-60"></div>
+
+      <!-- Level tooltip -->
+      <div class="absolute top-[55%] left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 tilt-indicator opacity-80">
+        <div class="flex items-center gap-2 px-3 py-1 bg-on-surface/10 rounded-full backdrop-blur-md">
+          <span class="material-symbols-outlined text-white text-[16px]">screen_rotation</span>
+          <span class="font-mono-tech text-mono-tech text-white">Level Your Phone</span>
+        </div>
+      </div>
+
+      <!-- Center: Qibla Marker -->
+      <div class="relative flex flex-col items-center transition-all duration-500 transform scale-100">
+        <div class="relative w-48 h-48 flex items-center justify-center">
+          <!-- Glowing outer rings -->
+          <div class="absolute inset-0 border-2 border-secondary-fixed/30 rounded-full ar-hit-zone"></div>
+          <div class="absolute inset-4 border border-secondary-fixed/50 rounded-full"></div>
+          <!-- Main icon circle -->
+          <div class="z-20 w-24 h-24 bg-primary rounded-full shadow-2xl flex items-center justify-center border-4 border-secondary-fixed/20">
+            <span class="material-symbols-outlined text-white text-[48px]" style="font-variation-settings: 'FILL' 1;">mosque</span>
+          </div>
+          <!-- Direction pointer -->
+          <div class="absolute top-[-40px] flex flex-col items-center">
+            <div class="w-1 h-10 bg-gradient-to-t from-secondary-fixed to-transparent rounded-full"></div>
+          </div>
+        </div>
+        <div class="mt-4 flex flex-col items-center gap-1">
+          <h2 class="font-headline-lg-mobile text-headline-lg-mobile text-white drop-shadow-md">Qibla</h2>
+          <div id="ar-bearing-tag" class="px-3 py-1 bg-secondary-container rounded-lg shadow-sm">
+            <p id="ar-bearing-display" class="font-mono-tech text-mono-tech text-on-secondary-container">--°</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Floating masjid tags (populated dynamically by app.js) -->
+      <div id="ar-mosque-tags"></div>
+
+    </main>
+
+    <!-- Bottom Panel -->
+    <footer class="fixed bottom-0 left-0 w-full z-50 pointer-events-none pb-safe">
+      <div class="px-container-margin mb-stack-lg flex justify-center">
+        <span class="pointer-events-auto inline-flex items-center gap-2 bg-inverse-surface/80 text-inverse-on-surface px-4 py-1.5 rounded-full font-label-caps text-label-caps backdrop-blur-md">
+          <span class="material-symbols-outlined text-[14px]">science</span>
+          AR Mode: Experimental
+        </span>
+      </div>
+      <!-- Compass & Info Drawer Strip -->
+      <div class="pointer-events-auto glass-panel rounded-t-3xl border-t border-white/30 shadow-[0_-8px_30px_rgba(0,0,0,0.1)] px-container-margin py-stack-lg">
+        <!-- Dynamic Compass Strip -->
+        <div class="relative w-full h-12 mb-stack-md flex items-center overflow-hidden">
+          <div id="compass-strip"
+               class="absolute inset-0 flex items-center justify-center gap-12 text-on-surface/40 font-mono-tech text-label-caps tracking-widest transition-transform duration-300">
+            <span>W</span>
+            <span id="ar-heading-label" class="text-primary font-bold text-[16px]">--°</span>
+            <span>NW</span>
+            <span>330</span>
+            <span>N</span>
+            <span>030</span>
+            <span>NE</span>
+          </div>
+          <!-- Center indicator -->
+          <div class="absolute left-1/2 -translate-x-1/2 w-0.5 h-8 bg-primary z-10"></div>
+        </div>
+        <!-- Quick Action Cards -->
+        <div class="grid grid-cols-2 gap-stack-md">
+          <button class="bg-surface-container-highest/60 hover:bg-surface-container-highest transition-colors rounded-2xl p-stack-md flex items-center gap-stack-md group">
+            <div class="w-10 h-10 rounded-xl bg-primary-container text-on-primary-container flex items-center justify-center group-active:scale-90 transition-transform">
+              <span class="material-symbols-outlined">directions</span>
+            </div>
+            <div class="text-left">
+              <p class="font-label-caps text-label-caps text-on-surface-variant">Get Path</p>
+              <p class="font-title-md text-body-sm font-bold text-on-surface">Navigate</p>
+            </div>
+          </button>
+          <button class="bg-surface-container-highest/60 hover:bg-surface-container-highest transition-colors rounded-2xl p-stack-md flex items-center gap-stack-md group">
+            <div class="w-10 h-10 rounded-xl bg-tertiary-container text-tertiary-fixed flex items-center justify-center group-active:scale-90 transition-transform">
+              <span class="material-symbols-outlined">map</span>
+            </div>
+            <div class="text-left">
+              <p class="font-label-caps text-label-caps text-on-surface-variant">Switch to</p>
+              <p class="font-title-md text-body-sm font-bold text-on-surface">2D Map</p>
+            </div>
+          </button>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Atmospheric particles -->
+    <div class="fixed inset-0 pointer-events-none z-20" id="particles"></div>
+
+  </section>
+
+
+  <!-- ================================================================
+       SCREEN: SETTINGS / INFO
+       ================================================================ -->
+  <section data-screen="settings" class="min-h-screen pb-32 hidden">
+
+    <!-- Top AppBar -->
+    <header class="fixed top-0 w-full z-50 bg-surface/80 dark:bg-surface-dim/80 backdrop-blur-xl border-b border-outline-variant/30 flex justify-between items-center px-container-margin py-stack-md">
+      <div class="flex items-center gap-stack-sm">
+        <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">explore</span>
+        <h1 class="font-headline-lg-mobile text-headline-lg-mobile font-bold text-primary">ARQiblaMasjid</h1>
+      </div>
+      <button data-nav-home class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-high/50 transition-colors active:scale-95 duration-200">
+        <span class="material-symbols-outlined text-on-surface-variant">close</span>
+      </button>
+    </header>
+
+    <main class="pt-[80px] pb-[100px] px-container-margin">
+      <div class="max-w-md mx-auto space-y-stack-lg">
+
+        <!-- Hero Info Card -->
+        <section class="rounded-xl overflow-hidden bg-surface shadow-sm border border-outline-variant/20">
+          <div class="h-32 bg-primary relative overflow-hidden">
+            <div class="absolute inset-0 opacity-20 pointer-events-none">
+              <div class="absolute -right-4 -top-4 w-32 h-32 rounded-full border-[8px] border-surface"></div>
+              <div class="absolute left-10 bottom-0 w-24 h-24 rounded-full border-[4px] border-surface"></div>
+            </div>
+            <div class="absolute inset-0 flex items-center px-stack-md">
+              <h2 class="text-on-primary font-headline-lg text-headline-lg">Settings &amp; Info</h2>
+            </div>
+          </div>
+          <div class="p-stack-md space-y-stack-md">
+            <div class="flex items-start gap-stack-sm">
+              <span class="material-symbols-outlined text-primary">info</span>
+              <div>
+                <h3 class="font-title-md text-title-md text-on-surface">About ARQiblaMasjid</h3>
+                <p class="font-body-sm text-body-sm text-on-surface-variant mt-1 leading-relaxed">
+                  A modern tool for the global Muslim community, combining AR technology with traditional needs.
+                  Designed for precision, privacy, and peace of mind.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Calibration & Accuracy Section -->
+        <section class="bg-surface rounded-xl p-stack-md border border-outline-variant/20 space-y-stack-md">
+          <div class="flex items-center gap-stack-sm border-b border-outline-variant/20 pb-stack-sm">
+            <span class="material-symbols-outlined text-secondary">compass_calibration</span>
+            <h3 class="font-title-md text-title-md text-on-surface">Calibration &amp; Accuracy</h3>
+          </div>
+          <div class="space-y-stack-sm">
+            <p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+              For the most precise results, calibrate your phone's compass by moving it in a smooth
+              <span class="font-semibold text-primary">figure-8 motion</span> in the air.
+            </p>
+            <p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+              A slight difference of a few degrees in Qibla direction is still within acceptable tolerance
+              according to many scholars and astronomers. Do not worry about very small deviations.
+            </p>
+            <div class="bg-surface-container-low p-stack-sm rounded-lg flex gap-stack-sm items-center border border-outline-variant/10">
+              <span class="material-symbols-outlined text-error text-[20px]">warning</span>
+              <p class="font-mono-tech text-mono-tech text-on-surface-variant">
+                Note: Electromagnetic interference from nearby metal or electronics can affect results.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Toggle Settings Section -->
+        <section class="bg-surface rounded-xl border border-outline-variant/20 divide-y divide-outline-variant/20">
+          <!-- Push Notifications -->
+          <div class="p-stack-md flex items-center justify-between">
+            <div class="flex items-center gap-stack-sm">
+              <span class="material-symbols-outlined text-on-surface-variant">notifications</span>
+              <span class="font-title-md text-title-md text-on-surface">Push Notifications</span>
+            </div>
+            <label class="switch-toggle">
+              <input type="checkbox" checked/>
+              <span class="slider rounded-full"></span>
+            </label>
+          </div>
+          <!-- Metric Units -->
+          <div class="p-stack-md flex items-center justify-between">
+            <div class="flex items-center gap-stack-sm">
+              <span class="material-symbols-outlined text-on-surface-variant">straighten</span>
+              <span class="font-title-md text-title-md text-on-surface">Use Metric Units</span>
+            </div>
+            <label class="switch-toggle">
+              <input type="checkbox" checked/>
+              <span class="slider rounded-full"></span>
+            </label>
+          </div>
+          <!-- Dark Mode -->
+          <div class="p-stack-md flex items-center justify-between">
+            <div class="flex items-center gap-stack-sm">
+              <span class="material-symbols-outlined text-on-surface-variant">dark_mode</span>
+              <span class="font-title-md text-title-md text-on-surface">Dark Mode</span>
+            </div>
+            <label class="switch-toggle">
+              <input id="dark-mode-toggle" type="checkbox"/>
+              <span class="slider rounded-full"></span>
+            </label>
+          </div>
+        </section>
+
+        <!-- Privacy Section -->
+        <section class="bg-surface rounded-xl p-stack-md border border-outline-variant/20 space-y-stack-md">
+          <div class="flex items-center gap-stack-sm border-b border-outline-variant/20 pb-stack-sm">
+            <span class="material-symbols-outlined text-primary">security</span>
+            <h3 class="font-title-md text-title-md text-on-surface">Privacy</h3>
+          </div>
+          <p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+            Your location is processed <span class="font-semibold text-primary">locally on-device</span>
+            to calculate bearings and find nearby mosques. We do not store or transmit your precise coordinates.
+          </p>
+          <div class="pt-2">
+            <button class="text-primary font-label-caps text-label-caps hover:underline flex items-center gap-1">
+              VIEW FULL PRIVACY POLICY
+              <span class="material-symbols-outlined text-[14px]">open_in_new</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- Version Info -->
+        <div class="text-center py-stack-md">
+          <p class="font-mono-tech text-mono-tech text-outline">v1.0.0 (Build 1)</p>
+        </div>
+
+      </div>
+    </main>
+
+    <!-- Bottom Navigation Bar (Settings active) -->
+    <nav class="fixed bottom-0 left-0 w-full z-50 bg-surface/90 dark:bg-inverse-surface/90 backdrop-blur-lg border-t border-outline-variant/20 rounded-t-xl shadow-lg flex justify-around items-center px-4 py-3 pb-safe">
+      <button data-nav-home
+              class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-variant/40 active:scale-90 transition-all duration-150">
+        <span class="material-symbols-outlined mb-1">near_me</span>
+        <span class="font-label-caps text-label-caps">Qibla</span>
+      </button>
+      <button data-nav-masjids
+              class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-variant/40 active:scale-90 transition-all duration-150">
+        <span class="material-symbols-outlined mb-1">mosque</span>
+        <span class="font-label-caps text-label-caps">Masjids</span>
+      </button>
+      <button class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-variant/40 active:scale-90 transition-all duration-150">
+        <span class="material-symbols-outlined mb-1">bookmark</span>
+        <span class="font-label-caps text-label-caps">Saved</span>
+      </button>
+      <button data-nav-settings
+              class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-4 py-1 active:scale-90 transition-all duration-150">
+        <span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 1;">tune</span>
+        <span class="font-label-caps text-label-caps">Settings</span>
+      </button>
+    </nav>
+
+  </section>
+
+
+  <!-- ================================================================
+       APPLICATION LOGIC
+       ================================================================ -->
+  <script src="app.js"></script>
+
+  <!-- AR Particles micro-interaction (from ar_overlay_view stitch) -->
+  <script>
+    (function() {
+      var particlesContainer = document.getElementById('particles');
+      if (!particlesContainer) return;
+      for (var i = 0; i < 20; i++) {
+        var p = document.createElement('div');
+        p.className = 'absolute bg-secondary-fixed/40 rounded-full';
+        var size = Math.random() * 4 + 1;
+        p.style.width = size + 'px';
+        p.style.height = size + 'px';
+        p.style.left = Math.random() * 100 + '%';
+        p.style.top = Math.random() * 100 + '%';
+        p.style.opacity = Math.random() * 0.5;
+        particlesContainer.appendChild(p);
+      }
+
+      // Mouse/touch parallax for AR floating tags
+      document.addEventListener('mousemove', function(e) {
+        var moveX = (e.clientX / window.innerWidth - 0.5) * 40;
+        var tags = document.querySelectorAll('.floating-tag');
+        tags.forEach(function(tag, idx) {
+          var speed = (idx + 1) * 0.5;
+          tag.style.transform = 'translate(' + (moveX * speed) + 'px, 0)';
+        });
+      });
+    })();
+  </script>
+
+</body>
+</html>
