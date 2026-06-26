@@ -1,0 +1,44 @@
+{
+  "name": "ARQiblaMasjid",
+  "short_name": "ARQibla",
+  "description": "AR Qibla & Mosque Finder for the global Muslim community",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f8faf9",
+  "theme_color": "#005147",
+  "categories": ["lifestyle", "navigation", "utilities"],
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='32' fill='%23005147'/%3E%3Ctext x='96' y='130' text-anchor='middle' font-size='120' fill='white'%3E🕋%3C/text%3E%3C/svg%3E",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='64' fill='%23005147'/%3E%3Ctext x='256' y='340' text-anchor='middle' font-size='240' fill='white'%3E🕋%3C/text%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "shortcuts": [
+    {
+      "name": "Qibla Direction",
+      "short_name": "Qibla",
+      "description": "Find Qibla direction",
+      "url": "/",
+      "icons": []
+    },
+    {
+      "name": "Nearby Masjids",
+      "short_name": "Masjids",
+      "description": "Find nearby mosques",
+      "url": "/?screen=masjids",
+      "icons": []
+    }
+  ]
+}

@@ -3,6 +3,10 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <meta name="theme-color" content="#005147"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <link rel="manifest" href="manifest.json"/>
   <title>ARQiblaMasjid - AR Qibla &amp; Mosque Finder</title>
 
   <!-- Tailwind CSS (Stitch convention) -->
@@ -102,9 +106,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Geist:wght@500;600&display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 
-  <!-- A-Frame for AR/WebXR -->
-  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-
   <!-- Supplementary styles -->
   <link href="app.css" rel="stylesheet"/>
 
@@ -132,7 +133,7 @@
                 class="px-2.5 py-1 rounded-full border border-outline-variant/40 bg-surface-container-high/60 font-label-caps text-label-caps text-primary font-bold active:scale-95 transition-all duration-150">
           <span data-i18n="langToggle">ID</span>
         </button>
-        <button data-open-settings class="p-2 rounded-full hover:bg-surface-container-high/50 transition-colors active:scale-95 duration-200">
+        <button data-open-settings aria-label="Open settings" class="p-2 rounded-full hover:bg-surface-container-high/50 transition-colors active:scale-95 duration-200">
           <span class="material-symbols-outlined text-on-surface-variant">settings</span>
         </button>
       </div>
@@ -239,36 +240,37 @@
 
     </main>
 
-    <!-- Fixed CTA: Enter AR View -->
-    <div class="fixed bottom-24 left-1/2 -translate-x-1/2 w-full max-w-md px-container-margin z-40">
+    <!-- Fixed CTA: Enter AR View -->      <div class="fixed bottom-24 left-1/2 -translate-x-1/2 w-full max-w-md px-container-margin z-40">
       <button data-enter-ar
-              data-i18n="enterArView"
-              class="w-full bg-primary text-on-primary font-title-md text-title-md py-4 rounded-full shadow-lg active:scale-95 transition-all duration-200 flex items-center justify-center gap-3 group">
+              aria-label="Enter AR View"
+              class="w-full bg-primary text-on-primary font-title-md text-title-md py-4 rounded-full shadow-lg active:scale-95 transition-all duration-200 flex items-center justify-center gap-3 group shadow-xl shadow-primary/20">
         <span class="material-symbols-outlined group-hover:rotate-12 transition-transform">view_in_ar</span>
-        Enter AR View
+        <span data-i18n="enterArView">Enter AR View</span>
       </button>
     </div>
 
     <!-- Bottom Navigation Bar -->
     <nav id="bottom-nav" class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 py-3 pb-safe bg-surface/90 dark:bg-inverse-surface/90 backdrop-blur-lg border-t border-outline-variant/20 z-50 rounded-t-xl">
       <button data-nav-home
+              aria-label="Qibla"
               class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-4 py-1 active:scale-90 transition-all duration-150 cursor-pointer">
-        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">near_me</span>
-        <span data-i18n="qibla" class="font-label-caps text-label-caps">Qibla</span>
+        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">near_me</span>          <span data-i18n="nearMeTab" class="font-label-caps text-label-caps">Qibla</span>
       </button>
       <button data-nav-masjids
+              aria-label="Masjids"
               class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant/40 rounded-full px-4 py-1 active:scale-90 transition-all duration-150 cursor-pointer">
-        <span class="material-symbols-outlined">mosque</span>
-        <span class="font-label-caps text-label-caps">Masjids</span>
+        <span class="material-symbols-outlined">mosque</span>          <span data-i18n="masjidsTab" class="font-label-caps text-label-caps">Masjids</span>
       </button>
-      <button class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant/40 rounded-full px-4 py-1 active:scale-90 transition-all duration-150 cursor-pointer">
-        <span class="material-symbols-outlined">bookmark</span>
-        <span class="font-label-caps text-label-caps">Saved</span>
+      <button id="nav-saved"
+              aria-label="Saved"
+              class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant/40 rounded-full px-4 py-1 active:scale-90 transition-all duration-150 cursor-pointer">
+        <span class="material-symbols-outlined">bookmark</span>          <span data-i18n="savedTab" class="font-label-caps text-label-caps">Saved</span>
       </button>
       <button data-nav-settings
+              aria-label="Settings"
               class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant/40 rounded-full px-4 py-1 active:scale-90 transition-all duration-150 cursor-pointer">
         <span class="material-symbols-outlined">tune</span>
-        <span class="font-label-caps text-label-caps">Settings</span>
+        <span data-i18n="settingsTab" class="font-label-caps text-label-caps">Settings</span>
       </button>
     </nav>
 
@@ -313,23 +315,25 @@
     <!-- Bottom Navigation Bar -->
     <nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 py-3 pb-safe bg-surface/90 dark:bg-inverse-surface/90 backdrop-blur-lg border-t border-outline-variant/20 z-50 rounded-t-xl">
       <button data-nav-home
+              aria-label="Qibla"
               class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant/40 rounded-full px-4 py-1 active:scale-90 transition-all duration-150 cursor-pointer">
-        <span class="material-symbols-outlined mb-1">near_me</span>
-        <span data-i18n="qibla" class="font-label-caps text-label-caps">Qibla</span>
+        <span class="material-symbols-outlined mb-1">near_me</span>          <span data-i18n="nearMeTab" class="font-label-caps text-label-caps">Qibla</span>
       </button>
       <button data-nav-masjids
+              aria-label="Masjids"
               class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-4 py-1 active:scale-90 transition-all duration-150 cursor-pointer">
-        <span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 1;">mosque</span>
-        <span class="font-label-caps text-label-caps">Masjids</span>
+        <span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 1;">mosque</span>          <span data-i18n="masjidsTab" class="font-label-caps text-label-caps">Masjids</span>
       </button>
-      <button class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant/40 rounded-full px-4 py-1 active:scale-90 transition-all duration-150 cursor-pointer">
-        <span class="material-symbols-outlined mb-1">bookmark</span>
-        <span class="font-label-caps text-label-caps">Saved</span>
+      <button id="nav-saved-masjids"
+              aria-label="Saved"
+              class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant/40 rounded-full px-4 py-1 active:scale-90 transition-all duration-150 cursor-pointer">
+        <span class="material-symbols-outlined mb-1">bookmark</span>          <span data-i18n="savedTab" class="font-label-caps text-label-caps">Saved</span>
       </button>
       <button data-nav-settings
+              aria-label="Settings"
               class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant/40 rounded-full px-4 py-1 active:scale-90 transition-all duration-150 cursor-pointer">
         <span class="material-symbols-outlined mb-1">tune</span>
-        <span class="font-label-caps text-label-caps">Settings</span>
+        <span data-i18n="settingsTab" class="font-label-caps text-label-caps">Settings</span>
       </button>
     </nav>
 
@@ -347,16 +351,17 @@
       <video id="ar-camera-video"
              class="hidden w-full h-full object-cover"
              autoplay playsinline muted></video>
-      <!-- Fallback static image (shown when camera unavailable) -->
+      <!-- Fallback gradient (shown when camera unavailable) -->
       <div id="ar-camera-fallback"
-           class="w-full h-full bg-cover bg-center brightness-75 scale-110"
-           style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBDIpu4CbkbceANgBkwk1x4GJmbVCZHf9D71h9qIV51y4evHb2Ewy_0uaxylsJhP59F7m0SMgOxqwL9H1tFGYMIXzgDK7Ln4T4tEaDHvpYg1FLSYOC8zrlYi6rieN8l4Eggq5bBR2wHZFhweOzykfcGS8Q1-l0Iop9MYXGxJCMnFgpUGFHzhdlBA3VaRSgrvZ4LyI1Z67X8wBd1gCzG_zuG7wBJ5uYExY5QKWOTW1bptzOF8vBfk0_66MLC0dFNzqqpbhO8USeBpA')"></div>
+           class="w-full h-full brightness-75 scale-110"
+           style="background: linear-gradient(135deg, #0a1628 0%, #1a2a4a 40%, #2a4a6a 100%);"></div>
     </div>
 
     <!-- Top Overlay -->
     <header class="fixed top-0 left-0 w-full z-50 px-container-margin py-stack-md flex items-center justify-between pointer-events-none">
       <div class="flex items-center gap-stack-md pointer-events-auto">
         <button data-back-ar
+                aria-label="Back to home"
                 class="w-10 h-10 rounded-full glass-panel flex items-center justify-center text-on-surface active:scale-90 transition-transform">
           <span class="material-symbols-outlined">arrow_back</span>
         </button>
@@ -395,8 +400,7 @@
             <div class="w-1 h-10 bg-gradient-to-t from-secondary-fixed to-transparent rounded-full"></div>
           </div>
         </div>
-        <div class="mt-4 flex flex-col items-center gap-1">
-          <h2 data-i18n="qibla" class="font-headline-lg-mobile text-headline-lg-mobile text-white drop-shadow-md">Qibla</h2>
+        <div class="mt-4 flex flex-col items-center gap-1">            <h2 data-i18n="qiblaTitle" class="font-headline-lg-mobile text-headline-lg-mobile text-white drop-shadow-md">Qibla</h2>
           <div class="px-3 py-1 bg-secondary-container rounded-lg shadow-sm">
             <p id="ar-bearing-display" class="font-mono-tech text-mono-tech text-on-secondary-container">--°</p>
           </div>
@@ -436,30 +440,31 @@
         </div>
         <!-- Quick Action Cards -->
         <div class="grid grid-cols-2 gap-stack-md">
-          <button class="bg-white/10 hover:bg-white/20 transition-colors rounded-2xl p-stack-md flex items-center gap-stack-md group">
-            <div class="w-10 h-10 rounded-xl bg-primary-container text-on-primary-container flex items-center justify-center group-active:scale-90 transition-transform">
-              <span class="material-symbols-outlined">directions</span>
-            </div>
-            <div class="text-left">
-              <p data-i18n="getPath" class="font-label-caps text-label-caps text-white/60">Get Path</p>
-              <p data-i18n="navigate" class="font-title-md text-body-sm font-bold text-white">Navigate</p>
-            </div>
-          </button>
-          <button class="bg-white/10 hover:bg-white/20 transition-colors rounded-2xl p-stack-md flex items-center gap-stack-md group">
-            <div class="w-10 h-10 rounded-xl bg-tertiary-container text-tertiary-fixed flex items-center justify-center group-active:scale-90 transition-transform">
-              <span class="material-symbols-outlined">map</span>
-            </div>
-            <div class="text-left">
-              <p data-i18n="switchTo" class="font-label-caps text-label-caps text-white/60">Switch to</p>
-              <p data-i18n="map2d" class="font-title-md text-body-sm font-bold text-white">2D Map</p>
-            </div>
-          </button>
+      <button id="ar-navigate-btn" aria-label="Navigate to mosque" class="bg-white/10 hover:bg-white/20 transition-colors rounded-2xl p-stack-md flex items-center gap-stack-md group">
+        <div class="w-10 h-10 rounded-xl bg-primary-container text-on-primary-container flex items-center justify-center group-active:scale-90 transition-transform">
+          <span class="material-symbols-outlined">directions</span>
+        </div>
+        <div class="text-left">
+          <p data-i18n="getPath" class="font-label-caps text-label-caps text-white/60">Get Path</p>
+          <p data-i18n="navigate" class="font-title-md text-body-sm font-bold text-white">Navigate</p>
+        </div>
+      </button>
+      <button id="ar-map-btn" aria-label="Switch to 2D Map" class="bg-white/10 hover:bg-white/20 transition-colors rounded-2xl p-stack-md flex items-center gap-stack-md group">
+        <div class="w-10 h-10 rounded-xl bg-tertiary-container text-tertiary-fixed flex items-center justify-center group-active:scale-90 transition-transform">
+          <span class="material-symbols-outlined">map</span>
+        </div>
+        <div class="text-left">
+          <p data-i18n="switchTo" class="font-label-caps text-label-caps text-white/60">Switch to</p>
+          <p data-i18n="map2d" class="font-title-md text-body-sm font-bold text-white">2D Map</p>
+        </div>
+      </button>
         </div>
       </div>
     </footer>
 
     <!-- Atmospheric particles -->
-    <div class="fixed inset-0 pointer-events-none z-20" id="particles"></div>
+    <!-- Atmospheric particles container -->
+    <div class="fixed inset-0 pointer-events-none z-20" id="particles" aria-hidden="true"></div>
 
   </section>
 
@@ -475,7 +480,7 @@
         <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">explore</span>
         <h1 class="font-headline-lg-mobile text-headline-lg-mobile font-bold text-primary">ARQiblaMasjid</h1>
       </div>
-      <button data-nav-home class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-high/50 transition-colors active:scale-95 duration-200">
+      <button data-nav-home aria-label="Close settings" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-high/50 transition-colors active:scale-95 duration-200">
         <span class="material-symbols-outlined text-on-surface-variant">close</span>
       </button>
     </header>
@@ -597,23 +602,25 @@
     <!-- Bottom Navigation Bar (Settings active) -->
     <nav class="fixed bottom-0 left-0 w-full z-50 bg-surface/90 dark:bg-inverse-surface/90 backdrop-blur-lg border-t border-outline-variant/20 rounded-t-xl shadow-lg flex justify-around items-center px-4 py-3 pb-safe">
       <button data-nav-home
+              aria-label="Qibla"
               class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-variant/40 active:scale-90 transition-all duration-150">
-        <span class="material-symbols-outlined mb-1">near_me</span>
-        <span data-i18n="qibla" class="font-label-caps text-label-caps">Qibla</span>
+        <span class="material-symbols-outlined mb-1">near_me</span>          <span data-i18n="nearMeTab" class="font-label-caps text-label-caps">Qibla</span>
       </button>
       <button data-nav-masjids
+              aria-label="Masjids"
               class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-variant/40 active:scale-90 transition-all duration-150">
-        <span class="material-symbols-outlined mb-1">mosque</span>
-        <span class="font-label-caps text-label-caps">Masjids</span>
+        <span class="material-symbols-outlined mb-1">mosque</span>          <span data-i18n="masjidsTab" class="font-label-caps text-label-caps">Masjids</span>
       </button>
-      <button class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-variant/40 active:scale-90 transition-all duration-150">
-        <span class="material-symbols-outlined mb-1">bookmark</span>
-        <span class="font-label-caps text-label-caps">Saved</span>
+      <button id="nav-saved-settings"
+              aria-label="Saved"
+              class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-variant/40 active:scale-90 transition-all duration-150">
+        <span class="material-symbols-outlined mb-1">bookmark</span>          <span data-i18n="savedTab" class="font-label-caps text-label-caps">Saved</span>
       </button>
       <button data-nav-settings
+              aria-label="Settings"
               class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-4 py-1 active:scale-90 transition-all duration-150">
         <span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 1;">tune</span>
-        <span class="font-label-caps text-label-caps">Settings</span>
+        <span data-i18n="settingsTab" class="font-label-caps text-label-caps">Settings</span>
       </button>
     </nav>
 

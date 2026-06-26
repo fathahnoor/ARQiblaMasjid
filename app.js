@@ -22,18 +22,60 @@ const EARTH_RADIUS_KM = 6371;
 const QIBLA_ERROR_MARGIN = 3;
 const SEARCH_RADIUS_KM = 2;
 
-const MOSQUE_DATA = [
-  { name: "Masjid Al-Ikhlas",        lat: 51.5194, lon: -0.0608 },
-  { name: "East London Mosque",      lat: 51.5195, lon: -0.0630 },
-  { name: "Brick Lane Jamme Masjid", lat: 51.5201, lon: -0.0706 },
-  { name: "Masjid Tauhidul Islam",   lat: 51.5278, lon: -0.0554 },
-  { name: "Shah Jahan Mosque",       lat: 51.5132, lon: -0.0840 },
-  { name: "Masjid Umar",             lat: 51.5170, lon: -0.0580 },
-  { name: "London Central Mosque",   lat: 51.5524, lon: -0.1728 },
-  { name: "Finsbury Park Mosque",    lat: 51.5644, lon: -0.1065 },
-  { name: "Suleymaniye Mosque",      lat: 51.5208, lon: -0.0729 },
-  { name: "Masjid Al-Tawhid",        lat: 51.5592, lon: -0.0955 },
-];
+/** Regional mosque datasets keyed by region center coordinates.
+ *  The app auto-selects the closest dataset based on user location. */
+const MOSQUE_REGIONS = {
+  london: {
+    center: { lat: 51.5074, lon: -0.1278 },
+    data: [
+      { name: "Masjid Al-Ikhlas",        lat: 51.5194, lon: -0.0608 },
+      { name: "East London Mosque",      lat: 51.5195, lon: -0.0630 },
+      { name: "Brick Lane Jamme Masjid", lat: 51.5201, lon: -0.0706 },
+      { name: "Masjid Tauhidul Islam",   lat: 51.5278, lon: -0.0554 },
+      { name: "Shah Jahan Mosque",       lat: 51.5132, lon: -0.0840 },
+      { name: "Masjid Umar",             lat: 51.5170, lon: -0.0580 },
+      { name: "London Central Mosque",   lat: 51.5524, lon: -0.1728 },
+      { name: "Finsbury Park Mosque",    lat: 51.5644, lon: -0.1065 },
+      { name: "Suleymaniye Mosque",      lat: 51.5208, lon: -0.0729 },
+      { name: "Masjid Al-Tawhid",        lat: 51.5592, lon: -0.0955 },
+    ],
+  },
+  jakarta: {
+    center: { lat: -6.2088, lon: 106.8456 },
+    data: [
+      { name: "Masjid Istiqlal",          lat: -6.1701, lon: 106.8311 },
+      { name: "Masjid Al-Azhar",          lat: -6.2349, lon: 106.7947 },
+      { name: "Masjid Sunda Kelapa",      lat: -6.1995, lon: 106.8167 },
+      { name: "Masjid At-Tin",            lat: -6.3033, lon: 106.8609 },
+      { name: "Masjid Baiturrahman",      lat: -6.2090, lon: 106.8200 },
+      { name: "Masjid Al-Makmur",         lat: -6.2130, lon: 106.8300 },
+      { name: "Masjid Jami' Al-Mansyur",  lat: -6.1575, lon: 106.7236 },
+      { name: "Masjid Raya Pondok Indah",  lat: -6.2700, lon: 106.7800 },
+      { name: "Masjid Agung Al-Azhom",    lat: -6.2333, lon: 106.7167 },
+      { name: "Masjid Al-Ittihad",        lat: -6.2250, lon: 106.8450 },
+    ],
+  },
+};
+
+/** Currently active mosque dataset (selected based on user location) */
+let MOSQUE_DATA = MOSQUE_REGIONS.london.data;
+
+/**
+ * Auto-select the closest mosque region based on user coordinates.
+ * Region determined by Haversine distance to each region center.
+ */
+function selectMosqueRegion(lat, lon) {
+  let closest = "london";
+  let minDist = Infinity;
+  for (const [key, region] of Object.entries(MOSQUE_REGIONS)) {
+    const dist = computeDistance(lat, lon, region.center.lat, region.center.lon);
+    if (dist < minDist) {
+      minDist = dist;
+      closest = key;
+    }
+  }
+  MOSQUE_DATA = MOSQUE_REGIONS[closest].data;
+}
 
 const AppState = {
   geoState: "loading",
@@ -68,6 +110,7 @@ const I18N = {
     live: "LIVE",
     error: "ERROR",
     qibla: "Qibla",
+    qiblaTitle: "Qibla",
     distanceToKabah: "Distance to Ka'bah",
     nearbyMasjids: "Nearby Masjids",
     radius: "Radius",
@@ -108,9 +151,17 @@ const I18N = {
     open: "Open",
     gettingLocation: "Getting your location…",
     langToggle: "ID",
+    masjidsTab: "Masjids",
+    savedTab: "Saved",
+    settingsTab: "Settings",
+    nearMeTab: "Qibla",
+    regionLondon: "London",
+    regionJakarta: "Jakarta",
+    mosqueCount: "mosques found",
+    mosqueRegion: "Region",
   },
   id: {
-    appSubtitle: "Penunjuk Arah Kibla & Masjid AR",
+    appSubtitle: "Penunjuk Arah Kiblat & Masjid AR",
     waitingLocation: "Menunggu lokasi…",
     requestingGps: "Meminta izin GPS",
     locationLabel: "Lokasi",
@@ -122,10 +173,11 @@ const I18N = {
     live: "LANGSUNG",
     error: "GAGAL",
     qibla: "Kiblat",
+    qiblaTitle: "Kiblat",
     distanceToKabah: "Jarak ke Ka'bah",
     nearbyMasjids: "Masjid Terdekat",
-    radius: "Jarak",
-    noMosques: "Tidak ada masjid dalam jarak",
+    radius: "Radius",
+    noMosques: "Tidak ada masjid dalam radius",
     km: "km",
     enterArView: "Masuk Mode AR",
     settingsAndInfo: "Pengaturan & Info",
@@ -162,6 +214,14 @@ const I18N = {
     open: "Buka",
     gettingLocation: "Mendapatkan lokasi Anda…",
     langToggle: "EN",
+    masjidsTab: "Masjid",
+    savedTab: "Tersimpan",
+    settingsTab: "Pengaturan",
+    nearMeTab: "Kiblat",
+    regionLondon: "London",
+    regionJakarta: "Jakarta",
+    mosqueCount: "masjid ditemukan",
+    mosqueRegion: "Wilayah",
   },
 };
 
@@ -303,6 +363,8 @@ function onGeoSuccess(pos) {
   AppState.qiblaBearing = computeQiblaBearing(latitude, longitude);
   AppState.distanceToKabah = computeDistance(latitude, longitude, KABAH.lat, KABAH.lon);
 
+  // Auto-select mosque region based on user location
+  selectMosqueRegion(latitude, longitude);
   computeNearbyMosques(latitude, longitude);
   AppState.emit();
 }
@@ -363,6 +425,25 @@ async function requestOrientationPermission() {
 }
 
 let _absoluteSupported = false;
+let _pendingHeading = null;
+let _rafId = null;
+
+/**
+ * Throttled orientation handler using requestAnimationFrame.
+ * Batches multiple sensor readings into a single render frame update.
+ */
+function scheduleHeadingUpdate(heading) {
+  _pendingHeading = ((heading % 360) + 360) % 360;
+  if (!_rafId) {
+    _rafId = requestAnimationFrame(function () {
+      _rafId = null;
+      if (_pendingHeading != null) {
+        AppState.heading = _pendingHeading;
+        AppState.emit();
+      }
+    });
+  }
+}
 
 function startListeningOrientation() {
   window.addEventListener("deviceorientationabsolute", function (e) {
@@ -381,6 +462,7 @@ function startListeningOrientation() {
 
 /**
  * Handle orientation events and normalise heading to 0-360 clockwise from north.
+ * Uses requestAnimationFrame to throttle rendering.
  *
  * CRITICAL FIX: On many Android browsers, `deviceorientationabsolute` provides
  * `alpha` that increases COUNTER-CLOCKWISE (standard spec). We must invert it
@@ -400,8 +482,7 @@ function handleOrientation(event) {
   }
 
   if (heading !== null) {
-    AppState.heading = ((heading % 360) + 360) % 360;
-    AppState.emit();
+    scheduleHeadingUpdate(heading);
   }
 }
 
@@ -602,8 +683,12 @@ function renderGeoStatus(state) {
   const icon = document.getElementById("geo-status-icon");
   const sensorBanner = document.getElementById("sensor-permission-banner");
 
+  // Sensor permission banner: only show on iOS when permission is needed
   if (sensorBanner) {
-    sensorBanner.classList.toggle("hidden", state.compassState !== "requesting");
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+                  (navigator.platform && navigator.platform.includes("Mac") && navigator.maxTouchPoints > 1);
+    const needsPermission = state.compassState === "requesting" && isIOS;
+    sensorBanner.classList.toggle("hidden", !needsPermission);
   }
 
   if (!card) return;
@@ -852,12 +937,25 @@ function renderARMosqueTags(state) {
 }
 
 /* ==========================================================================
-   9. INITIALIZATION
+   9. PWA / SERVICE WORKER
+   ========================================================================== */
+
+function registerServiceWorker() {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(function () {
+      // Service worker registration failed — app works offline anyway
+    });
+  }
+}
+
+/* ==========================================================================
+   10. INITIALIZATION
    ========================================================================== */
 
 function init() {
   initUIBindings();
   applyTranslations();
+  registerServiceWorker();
   AppState.on(render);
   initGeolocation();
   initOrientation();

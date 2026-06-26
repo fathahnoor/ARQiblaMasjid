@@ -5,3 +5,7 @@ stitch_arqiblamasjid_ar_ui/ar_overlay_view/
 stitch_arqiblamasjid_ar_ui/dashboard_qibla_masjids/
 stitch_arqiblamasjid_ar_ui/settings_privacy/
 stitch_arqiblamasjid_ar_ui/horizon_qibla/
+
+# Screen recording & frames
+Screen_Recording_*.mp4
+frames/

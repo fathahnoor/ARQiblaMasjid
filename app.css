@@ -7,7 +7,6 @@
 
 /* --- SPA screen management ------------------------------------------------ */
 [data-screen] {
-  display: none;
   opacity: 0;
   transition: opacity 0.25s ease;
 }
@@ -136,14 +135,25 @@ input:checked + .slider:before {
 }
 
 /* --- Dark mode overrides -------------------------------------------------- */
-.dark body,
+html.dark body,
 body.dark {
   background-color: #2e3131;
   color: #eff1f0;
 }
-.dark .bg-surface,
-.dark .bg-surface-container-lowest,
-.dark .bg-surface-lowest {
+html.dark .bg-surface,
+html.dark .bg-surface-container-lowest,
+html.dark .bg-surface-container-high,
+html.dark .bg-surface-container-highest,
+html.dark .bg-surface-lowest {
   background-color: #2e3131;
 }
-.dark .text-on-surface { color: #eff1f0; }
+html.dark .text-on-surface { color: #eff1f0; }
+html.dark .text-on-surface-variant { color: #c4c7c5; }
+html.dark .border-outline-variant\/20 { border-color: rgba(190, 201, 197, 0.08); }
+html.dark .bg-surface\/80,
+html.dark .bg-surface\/90 {
+  background-color: rgba(46, 49, 49, 0.9);
+}
+html.dark .bg-surface-container-low {
+  background-color: #383b3b;
+}
