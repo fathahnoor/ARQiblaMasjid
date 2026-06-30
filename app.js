@@ -55,6 +55,94 @@ const MOSQUE_REGIONS = {
       { name: "Masjid Al-Ittihad",        lat: -6.2250, lon: 106.8450 },
     ],
   },
+  medina: {
+    center: { lat: 24.4672, lon: 39.6112 },
+    data: [
+      { name: "Al-Masjid an-Nabawi",      lat: 24.4672, lon: 39.6112 },
+      { name: "Masjid Quba",              lat: 24.4424, lon: 39.6150 },
+      { name: "Masjid al-Qiblatain",      lat: 24.4870, lon: 39.5767 },
+      { name: "Masjid Jalal",             lat: 24.4630, lon: 39.6080 },
+      { name: "Masjid Sayid al-Shuhada",  lat: 24.4590, lon: 39.6170 },
+    ],
+  },
+  istanbul: {
+    center: { lat: 41.0082, lon: 28.9784 },
+    data: [
+      { name: "Sultan Ahmed Mosque",       lat: 41.0054, lon: 28.9768 },
+      { name: "Hagia Sophia Mosque",       lat: 41.0086, lon: 28.9802 },
+      { name: "Suleymaniye Mosque",        lat: 41.0162, lon: 28.9642 },
+      { name: "Fatih Mosque",              lat: 41.0193, lon: 28.9493 },
+      { name: "Bayezid II Mosque",         lat: 41.0114, lon: 28.9688 },
+      { name: "Ortakoy Mosque",            lat: 41.0553, lon: 29.0294 },
+      { name: "Mihrimah Sultan Mosque",    lat: 41.0164, lon: 28.9452 },
+      { name: "Eminonu New Mosque",        lat: 41.0174, lon: 28.9732 },
+    ],
+  },
+  cairo: {
+    center: { lat: 30.0444, lon: 31.2357 },
+    data: [
+      { name: "Al-Azhar Mosque",           lat: 30.0473, lon: 31.2563 },
+      { name: "Sultan Hassan Mosque",      lat: 30.0300, lon: 31.2495 },
+      { name: "Al-Rifa'i Mosque",          lat: 30.0295, lon: 31.2518 },
+      { name: "Ibn Tulun Mosque",          lat: 30.0284, lon: 31.2498 },
+      { name: "Amr Ibn Al-Aas Mosque",     lat: 30.0290, lon: 31.2292 },
+      { name: "Al-Hussein Mosque",         lat: 30.0523, lon: 31.2502 },
+    ],
+  },
+  dubai: {
+    center: { lat: 25.2048, lon: 55.2708 },
+    data: [
+      { name: "Jumeirah Mosque",           lat: 25.2340, lon: 55.2540 },
+      { name: "Al Farooq Omar Bin Al Khattab", lat: 25.1886, lon: 55.2652 },
+      { name: "Grand Mosque (Al Ahmadiah)", lat: 25.2631, lon: 55.2913 },
+      { name: "Al Salam Mosque",           lat: 25.2100, lon: 55.2700 },
+      { name: "Abu Huraira Mosque",        lat: 25.1970, lon: 55.2744 },
+      { name: "Al Noor Mosque",            lat: 25.1980, lon: 55.2730 },
+    ],
+  },
+  kualalumpur: {
+    center: { lat: 3.1390, lon: 101.6869 },
+    data: [
+      { name: "Masjid Jamek",              lat: 3.1493, lon: 101.6965 },
+      { name: "National Mosque (Masjid Negara)", lat: 3.1405, lon: 101.6876 },
+      { name: "Federal Territory Mosque",  lat: 3.1710, lon: 101.6917 },
+      { name: "Masjid Wilayah Persekutuan", lat: 3.1710, lon: 101.6917 },
+      { name: "Masjid India",              lat: 3.1534, lon: 101.6973 },
+      { name: "Masjid Sri Sendayan",       lat: 3.1200, lon: 101.6700 },
+    ],
+  },
+  singapore: {
+    center: { lat: 1.3521, lon: 103.8198 },
+    data: [
+      { name: "Sultan Mosque",             lat: 1.3000, lon: 103.8556 },
+      { name: "Masjid Istiqlal (Johor)",   lat: 1.3010, lon: 103.8560 },
+      { name: "Masjid Jamae",              lat: 1.2804, lon: 103.8464 },
+      { name: "Masjid Abdul Gafoor",       lat: 1.3046, lon: 103.8558 },
+      { name: "Al-Islah Mosque",           lat: 1.4400, lon: 103.8300 },
+      { name: "Masjid Alkaff",             lat: 1.3550, lon: 103.8800 },
+    ],
+  },
+  newyork: {
+    center: { lat: 40.7128, lon: -74.0060 },
+    data: [
+      { name: "Islamic Center of NYC",     lat: 40.7527, lon: -73.9772 },
+      { name: "Masjid Manhattan",          lat: 40.7425, lon: -73.9887 },
+      { name: "Islamic Cultural Center",   lat: 40.7831, lon: -73.9591 },
+      { name: "Masjid Taqwa",              lat: 40.6770, lon: -73.9230 },
+      { name: "Masjid Al-Iman",            lat: 40.6880, lon: -73.9830 },
+      { name: "Muslim Center of NYC",      lat: 40.7620, lon: -73.9270 },
+    ],
+  },
+  mecca: {
+    center: { lat: 21.3891, lon: 39.8579 },
+    data: [
+      { name: "Masjid al-Haram",           lat: 21.4225, lon: 39.8262 },
+      { name: "Masjid al-Jinn",            lat: 21.4180, lon: 39.8330 },
+      { name: "Masjid al-Khayf",           lat: 21.3500, lon: 39.8700 },
+      { name: "Masjid Namirah",            lat: 21.3700, lon: 39.8900 },
+      { name: "Masjid Arafah",             lat: 21.3550, lon: 39.9830 },
+    ],
+  },
 };
 
 /** Currently active mosque dataset (selected based on user location) */
@@ -87,6 +175,7 @@ const AppState = {
   distanceToKabah: null,
   nearbyMosques: [],
   lang: "en",
+  useMetric: true,
   _listeners: [],
   on(callback) { this._listeners.push(callback); },
   emit() { this._listeners.forEach(cb => cb(this)); },
@@ -308,6 +397,13 @@ function computeBearing(lat1, lon1, lat2, lon2) {
 }
 
 function formatDistance(km) {
+  if (!AppState.useMetric) {
+    const miles = km * 0.621371;
+    if (miles < 0.1) {
+      return Math.round(km * 1000) + " m";
+    }
+    return miles.toFixed(1) + " mi";
+  }
   if (km < 1) {
     return Math.round(km * 1000) + " m";
   }
@@ -637,7 +733,6 @@ function initUIBindings() {
   if (darkToggle) {
     darkToggle.addEventListener("change", () => {
       document.documentElement.classList.toggle("dark", darkToggle.checked);
-      if (navigator.vibrate) navigator.vibrate(10);
     });
   }
 
@@ -649,12 +744,21 @@ function initUIBindings() {
     });
   });
 
-  // Other toggles with haptic feedback
+  // All toggle switches with haptic feedback
   document.querySelectorAll(".switch-toggle input").forEach(input => {
     input.addEventListener("change", () => {
       if (navigator.vibrate) navigator.vibrate(10);
     });
   });
+
+  // Metric / Imperial units toggle (second switch-toggle on settings screen)
+  const metricToggle = document.querySelectorAll(".switch-toggle input")[1];
+  if (metricToggle) {
+    metricToggle.addEventListener("change", () => {
+      AppState.useMetric = metricToggle.checked;
+      AppState.emit();
+    });
+  }
 
   // Haptic feedback on all buttons
   document.querySelectorAll("button, [role='button']").forEach(el => {
@@ -874,11 +978,15 @@ function renderARView(state) {
     arHeading.textContent = Math.round(state.heading) + "° " + compassLabel(state.heading);
   }
 
-  // Compass strip translation
+  // Compass strip translation — map 0-360° heading to horizontal scroll
+  // Each degree ≈ 3px of strip travel; center marker is at 50% of viewport
   const compassStrip = document.getElementById("compass-strip");
   if (compassStrip && state.heading != null) {
-    // Translate the strip so the heading value is centered
-    compassStrip.style.transform = `translateX(${-state.heading * 2}px)`;
+    const stripWidth = compassStrip.scrollWidth || 1200;
+    const centerOffset = stripWidth / 2;
+    const pxPerDeg = stripWidth / 360;
+    const translateX = centerOffset - (state.heading * pxPerDeg);
+    compassStrip.style.transform = `translateX(${translateX}px)`;
   }
 
   // AR Qibla marker position — move marker left/right based on bearing offset from heading
