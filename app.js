@@ -22,152 +22,46 @@ const EARTH_RADIUS_KM = 6371;
 const QIBLA_ERROR_MARGIN = 3;
 const SEARCH_RADIUS_KM = 2;
 
-/** Regional mosque datasets keyed by region center coordinates.
- *  The app auto-selects the closest dataset based on user location. */
-const MOSQUE_REGIONS = {
-  london: {
-    center: { lat: 51.5074, lon: -0.1278 },
-    data: [
-      { name: "Masjid Al-Ikhlas",        lat: 51.5194, lon: -0.0608 },
-      { name: "East London Mosque",      lat: 51.5195, lon: -0.0630 },
-      { name: "Brick Lane Jamme Masjid", lat: 51.5201, lon: -0.0706 },
-      { name: "Masjid Tauhidul Islam",   lat: 51.5278, lon: -0.0554 },
-      { name: "Shah Jahan Mosque",       lat: 51.5132, lon: -0.0840 },
-      { name: "Masjid Umar",             lat: 51.5170, lon: -0.0580 },
-      { name: "London Central Mosque",   lat: 51.5524, lon: -0.1728 },
-      { name: "Finsbury Park Mosque",    lat: 51.5644, lon: -0.1065 },
-      { name: "Suleymaniye Mosque",      lat: 51.5208, lon: -0.0729 },
-      { name: "Masjid Al-Tawhid",        lat: 51.5592, lon: -0.0955 },
-    ],
-  },
-  jakarta: {
-    center: { lat: -6.2088, lon: 106.8456 },
-    data: [
-      { name: "Masjid Istiqlal",          lat: -6.1701, lon: 106.8311 },
-      { name: "Masjid Al-Azhar",          lat: -6.2349, lon: 106.7947 },
-      { name: "Masjid Sunda Kelapa",      lat: -6.1995, lon: 106.8167 },
-      { name: "Masjid At-Tin",            lat: -6.3033, lon: 106.8609 },
-      { name: "Masjid Baiturrahman",      lat: -6.2090, lon: 106.8200 },
-      { name: "Masjid Al-Makmur",         lat: -6.2130, lon: 106.8300 },
-      { name: "Masjid Jami' Al-Mansyur",  lat: -6.1575, lon: 106.7236 },
-      { name: "Masjid Raya Pondok Indah",  lat: -6.2700, lon: 106.7800 },
-      { name: "Masjid Agung Al-Azhom",    lat: -6.2333, lon: 106.7167 },
-      { name: "Masjid Al-Ittihad",        lat: -6.2250, lon: 106.8450 },
-    ],
-  },
-  medina: {
-    center: { lat: 24.4672, lon: 39.6112 },
-    data: [
-      { name: "Al-Masjid an-Nabawi",      lat: 24.4672, lon: 39.6112 },
-      { name: "Masjid Quba",              lat: 24.4424, lon: 39.6150 },
-      { name: "Masjid al-Qiblatain",      lat: 24.4870, lon: 39.5767 },
-      { name: "Masjid Jalal",             lat: 24.4630, lon: 39.6080 },
-      { name: "Masjid Sayid al-Shuhada",  lat: 24.4590, lon: 39.6170 },
-    ],
-  },
-  istanbul: {
-    center: { lat: 41.0082, lon: 28.9784 },
-    data: [
-      { name: "Sultan Ahmed Mosque",       lat: 41.0054, lon: 28.9768 },
-      { name: "Hagia Sophia Mosque",       lat: 41.0086, lon: 28.9802 },
-      { name: "Suleymaniye Mosque",        lat: 41.0162, lon: 28.9642 },
-      { name: "Fatih Mosque",              lat: 41.0193, lon: 28.9493 },
-      { name: "Bayezid II Mosque",         lat: 41.0114, lon: 28.9688 },
-      { name: "Ortakoy Mosque",            lat: 41.0553, lon: 29.0294 },
-      { name: "Mihrimah Sultan Mosque",    lat: 41.0164, lon: 28.9452 },
-      { name: "Eminonu New Mosque",        lat: 41.0174, lon: 28.9732 },
-    ],
-  },
-  cairo: {
-    center: { lat: 30.0444, lon: 31.2357 },
-    data: [
-      { name: "Al-Azhar Mosque",           lat: 30.0473, lon: 31.2563 },
-      { name: "Sultan Hassan Mosque",      lat: 30.0300, lon: 31.2495 },
-      { name: "Al-Rifa'i Mosque",          lat: 30.0295, lon: 31.2518 },
-      { name: "Ibn Tulun Mosque",          lat: 30.0284, lon: 31.2498 },
-      { name: "Amr Ibn Al-Aas Mosque",     lat: 30.0290, lon: 31.2292 },
-      { name: "Al-Hussein Mosque",         lat: 30.0523, lon: 31.2502 },
-    ],
-  },
-  dubai: {
-    center: { lat: 25.2048, lon: 55.2708 },
-    data: [
-      { name: "Jumeirah Mosque",           lat: 25.2340, lon: 55.2540 },
-      { name: "Al Farooq Omar Bin Al Khattab", lat: 25.1886, lon: 55.2652 },
-      { name: "Grand Mosque (Al Ahmadiah)", lat: 25.2631, lon: 55.2913 },
-      { name: "Al Salam Mosque",           lat: 25.2100, lon: 55.2700 },
-      { name: "Abu Huraira Mosque",        lat: 25.1970, lon: 55.2744 },
-      { name: "Al Noor Mosque",            lat: 25.1980, lon: 55.2730 },
-    ],
-  },
-  kualalumpur: {
-    center: { lat: 3.1390, lon: 101.6869 },
-    data: [
-      { name: "Masjid Jamek",              lat: 3.1493, lon: 101.6965 },
-      { name: "National Mosque (Masjid Negara)", lat: 3.1405, lon: 101.6876 },
-      { name: "Federal Territory Mosque",  lat: 3.1710, lon: 101.6917 },
-      { name: "Masjid Wilayah Persekutuan", lat: 3.1710, lon: 101.6917 },
-      { name: "Masjid India",              lat: 3.1534, lon: 101.6973 },
-      { name: "Masjid Sri Sendayan",       lat: 3.1200, lon: 101.6700 },
-    ],
-  },
-  singapore: {
-    center: { lat: 1.3521, lon: 103.8198 },
-    data: [
-      { name: "Sultan Mosque",             lat: 1.3000, lon: 103.8556 },
-      { name: "Masjid Istiqlal (Johor)",   lat: 1.3010, lon: 103.8560 },
-      { name: "Masjid Jamae",              lat: 1.2804, lon: 103.8464 },
-      { name: "Masjid Abdul Gafoor",       lat: 1.3046, lon: 103.8558 },
-      { name: "Al-Islah Mosque",           lat: 1.4400, lon: 103.8300 },
-      { name: "Masjid Alkaff",             lat: 1.3550, lon: 103.8800 },
-    ],
-  },
-  newyork: {
-    center: { lat: 40.7128, lon: -74.0060 },
-    data: [
-      { name: "Islamic Center of NYC",     lat: 40.7527, lon: -73.9772 },
-      { name: "Masjid Manhattan",          lat: 40.7425, lon: -73.9887 },
-      { name: "Islamic Cultural Center",   lat: 40.7831, lon: -73.9591 },
-      { name: "Masjid Taqwa",              lat: 40.6770, lon: -73.9230 },
-      { name: "Masjid Al-Iman",            lat: 40.6880, lon: -73.9830 },
-      { name: "Muslim Center of NYC",      lat: 40.7620, lon: -73.9270 },
-    ],
-  },
-  mecca: {
-    center: { lat: 21.3891, lon: 39.8579 },
-    data: [
-      { name: "Masjid al-Haram",           lat: 21.4225, lon: 39.8262 },
-      { name: "Masjid al-Jinn",            lat: 21.4180, lon: 39.8330 },
-      { name: "Masjid al-Khayf",           lat: 21.3500, lon: 39.8700 },
-      { name: "Masjid Namirah",            lat: 21.3700, lon: 39.8900 },
-      { name: "Masjid Arafah",             lat: 21.3550, lon: 39.9830 },
-    ],
-  },
-};
-
-/** Currently active mosque dataset (selected based on user location) */
-let MOSQUE_DATA = MOSQUE_REGIONS.london.data;
+/** Overpass API endpoint (free, CORS-enabled, no key needed) */
+const OVERPASS_URL = "https://overpass-api.de/api/interpreter";
 
 /**
- * Auto-select the closest mosque region based on user coordinates.
- * Region determined by Haversine distance to each region center.
+ * Fetch nearby mosques from OpenStreetMap Overpass API.
+ * Queries amenity=mosque within the given radius (meters) of lat/lon.
+ * Returns an array of { name, lat, lon } objects.
  */
-function selectMosqueRegion(lat, lon) {
-  let closest = "london";
-  let minDist = Infinity;
-  for (const [key, region] of Object.entries(MOSQUE_REGIONS)) {
-    const dist = computeDistance(lat, lon, region.center.lat, region.center.lon);
-    if (dist < minDist) {
-      minDist = dist;
-      closest = key;
-    }
+async function fetchMosquesFromAPI(lat, lon, radiusMeters) {
+  const query = `[out:json][timeout:15];(
+    nwr["amenity"="mosque"](around:${radiusMeters},${lat},${lon});
+  );out center;`;
+
+  try {
+    const resp = await fetch(OVERPASS_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: "data=" + encodeURIComponent(query),
+    });
+    if (!resp.ok) throw new Error(`Overpass API ${resp.status}`);
+    const json = await resp.json();
+    return (json.elements || []).map(el => {
+      // Nodes have lat/lon directly; ways/relations use center
+      const c = el.center || el;
+      return {
+        name: (el.tags && el.tags.name) || "Mosque",
+        lat: c.lat,
+        lon: c.lon,
+      };
+    }).filter(m => m.lat != null && m.lon != null);
+  } catch (err) {
+    console.warn("Overpass API fetch failed:", err.message);
+    return null; // null signals failure so caller can use fallback
   }
-  MOSQUE_DATA = MOSQUE_REGIONS[closest].data;
 }
 
 const AppState = {
   geoState: "loading",
   compassState: "loading",
+  mosqueState: "idle",  // idle | loading | loaded | error
   currentScreen: "home",
   position: null,
   heading: null,
@@ -244,8 +138,7 @@ const I18N = {
     savedTab: "Saved",
     settingsTab: "Settings",
     nearMeTab: "Qibla",
-    regionLondon: "London",
-    regionJakarta: "Jakarta",
+    searchingMosques: "Searching nearby mosques…",
     mosqueCount: "mosques found",
     mosqueRegion: "Region",
   },
@@ -307,8 +200,7 @@ const I18N = {
     savedTab: "Tersimpan",
     settingsTab: "Pengaturan",
     nearMeTab: "Kiblat",
-    regionLondon: "London",
-    regionJakarta: "Jakarta",
+    searchingMosques: "Mencari masjid terdekat…",
     mosqueCount: "masjid ditemukan",
     mosqueRegion: "Wilayah",
   },
@@ -459,20 +351,69 @@ function onGeoSuccess(pos) {
   AppState.qiblaBearing = computeQiblaBearing(latitude, longitude);
   AppState.distanceToKabah = computeDistance(latitude, longitude, KABAH.lat, KABAH.lon);
 
-  // Auto-select mosque region based on user location
-  selectMosqueRegion(latitude, longitude);
-  computeNearbyMosques(latitude, longitude);
+  AppState.emit();
+
+  // Fetch mosques from Overpass API (async)
+  fetchNearbyMosques(latitude, longitude);
+}
+
+/**
+ * Fetch mosques from Overpass API, falling back to cached/local data on failure.
+ * Results are cached in localStorage keyed by rounded coordinates.
+ */
+async function fetchNearbyMosques(lat, lon) {
+  AppState.mosqueState = "loading";
+  AppState.emit();
+
+  // Round to ~100m precision for cache key
+  const cacheKey = `mosques_${lat.toFixed(2)}_${lon.toFixed(2)}`;
+
+  // Try fetching from Overpass API
+  const radiusMeters = SEARCH_RADIUS_KM * 1000;
+  const apiResult = await fetchMosquesFromAPI(lat, lon, radiusMeters);
+
+  if (apiResult !== null && apiResult.length > 0) {
+    // Success — cache the result
+    try { localStorage.setItem(cacheKey, JSON.stringify(apiResult)); } catch (e) {}
+    setMosqueData(apiResult, lat, lon);
+    AppState.mosqueState = "loaded";
+    AppState.emit();
+    return;
+  }
+
+  // API failed or returned empty — try cache
+  try {
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      setMosqueData(parsed, lat, lon);
+      AppState.mosqueState = "loaded";
+      AppState.emit();
+      return;
+    }
+  } catch (e) {}
+
+  // No cache and API returned empty — try with wider radius (3x)
+  if (apiResult !== null && apiResult.length === 0) {
+    const widerResult = await fetchMosquesFromAPI(lat, lon, radiusMeters * 3);
+    if (widerResult !== null && widerResult.length > 0) {
+      try { localStorage.setItem(cacheKey, JSON.stringify(widerResult)); } catch (e) {}
+      setMosqueData(widerResult, lat, lon);
+      AppState.mosqueState = "loaded";
+      AppState.emit();
+      return;
+    }
+  }
+
+  // All attempts failed — no mosques found
+  AppState.nearbyMosques = [];
+  AppState.mosqueState = "loaded";
   AppState.emit();
 }
 
-function onGeoError(err) {
-  AppState.geoState = "error";
-  AppState._geoError = err;
-  AppState.emit();
-}
-
-function computeNearbyMosques(lat, lon) {
-  AppState.nearbyMosques = MOSQUE_DATA
+/** Set mosque data and compute distances/bearings from user position. */
+function setMosqueData(mosques, lat, lon) {
+  AppState.nearbyMosques = mosques
     .map(m => {
       const dist = computeDistance(lat, lon, m.lat, m.lon);
       const bearing = computeBearing(lat, lon, m.lat, m.lon);
@@ -481,6 +422,14 @@ function computeNearbyMosques(lat, lon) {
     .filter(m => m.distance <= SEARCH_RADIUS_KM)
     .sort((a, b) => a.distance - b.distance);
 }
+
+function onGeoError(err) {
+  AppState.geoState = "error";
+  AppState._geoError = err;
+  AppState.emit();
+}
+
+
 
 /* ==========================================================================
    4. DEVICE ORIENTATION (COMPASS)
@@ -869,9 +818,30 @@ function renderMosqueList(state) {
   const container = document.getElementById("mosque-list");
   if (!container) return;
 
+  // Waiting for location
+  if (state.geoState !== "located") {
+    container.innerHTML = `
+      <div class="bg-surface-container-lowest rounded-xl p-stack-md border border-outline-variant/20 text-center">
+        <span class="material-symbols-outlined text-outline text-3xl mb-1">location_searching</span>
+        <p class="font-body-sm text-body-sm text-outline">${t("gettingLocation")}</p>
+      </div>`;
+    return;
+  }
+
+  // Loading mosques from API
+  if (state.mosqueState === "loading") {
+    container.innerHTML = `
+      <div class="bg-surface-container-lowest rounded-xl p-stack-md border border-outline-variant/20 text-center">
+        <span class="material-symbols-outlined text-primary animate-spin text-2xl mb-1">progress_activity</span>
+        <p class="font-body-sm text-body-sm text-outline">${t("searchingMosques")}</p>
+      </div>`;
+    return;
+  }
+
   if (state.nearbyMosques.length === 0) {
     container.innerHTML = `
       <div class="bg-surface-container-lowest rounded-xl p-stack-md border border-outline-variant/20 text-center">
+        <span class="material-symbols-outlined text-outline text-3xl mb-1">mosque</span>
         <p class="font-body-sm text-body-sm text-outline">${t("noMosques")} ${SEARCH_RADIUS_KM} ${t("km")}.</p>
       </div>`;
     return;
@@ -914,20 +884,30 @@ function renderMasjidsScreen(state) {
   const container = document.getElementById("masjids-screen-list");
   if (!container) return;
 
-  if (state.nearbyMosques.length === 0 && state.geoState === "located") {
-    container.innerHTML = `
-      <div class="bg-surface-container-lowest rounded-xl p-stack-lg border border-outline-variant/20 text-center">
-        <span class="material-symbols-outlined text-outline text-4xl mb-2">mosque</span>
-        <p class="font-body-sm text-body-sm text-outline">${t("noMosques")} ${SEARCH_RADIUS_KM} ${t("km")}.</p>
-      </div>`;
-    return;
-  }
-
   if (state.geoState !== "located") {
     container.innerHTML = `
       <div class="bg-surface-container-lowest rounded-xl p-stack-lg border border-outline-variant/20 text-center">
         <span class="material-symbols-outlined text-outline text-4xl mb-2">location_searching</span>
         <p class="font-body-sm text-body-sm text-outline">${t("gettingLocation")}</p>
+      </div>`;
+    return;
+  }
+
+  // Loading state
+  if (state.mosqueState === "loading") {
+    container.innerHTML = `
+      <div class="bg-surface-container-lowest rounded-xl p-stack-lg border border-outline-variant/20 text-center">
+        <span class="material-symbols-outlined text-primary animate-spin text-4xl mb-2">progress_activity</span>
+        <p class="font-body-sm text-body-sm text-outline">${t("searchingMosques") || "Searching nearby mosques…"}</p>
+      </div>`;
+    return;
+  }
+
+  if (state.nearbyMosques.length === 0) {
+    container.innerHTML = `
+      <div class="bg-surface-container-lowest rounded-xl p-stack-lg border border-outline-variant/20 text-center">
+        <span class="material-symbols-outlined text-outline text-4xl mb-2">mosque</span>
+        <p class="font-body-sm text-body-sm text-outline">${t("noMosques")} ${SEARCH_RADIUS_KM} ${t("km")}.</p>
       </div>`;
     return;
   }
