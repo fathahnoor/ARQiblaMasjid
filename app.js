@@ -409,7 +409,7 @@ async function fetchNearbyMosques(lat, lon) {
   const widerResult = await fetchMosquesFromAPI(lat, lon, radiusMeters * 5);
   if (widerResult !== null && widerResult.length > 0) {
     try { localStorage.setItem(cacheKey, JSON.stringify(widerResult)); } catch (e) {}
-    setMosqueData(widerResult, lat, lon);
+    setMosqueData(widerResult, lat, lon, radiusMeters * 5 / 1000);
     AppState.mosqueState = "loaded";
     AppState.emit();
     return;
@@ -422,14 +422,15 @@ async function fetchNearbyMosques(lat, lon) {
 }
 
 /** Set mosque data and compute distances/bearings from user position. */
-function setMosqueData(mosques, lat, lon) {
+function setMosqueData(mosques, lat, lon, maxDistance) {
+  const limit = maxDistance || SEARCH_RADIUS_KM;
   AppState.nearbyMosques = mosques
     .map(m => {
       const dist = computeDistance(lat, lon, m.lat, m.lon);
       const bearing = computeBearing(lat, lon, m.lat, m.lon);
       return { ...m, distance: dist, bearing };
     })
-    .filter(m => m.distance <= SEARCH_RADIUS_KM)
+    .filter(m => m.distance <= limit)
     .sort((a, b) => a.distance - b.distance);
 }
 
@@ -483,7 +484,7 @@ let _absoluteSupported = false;
 let _pendingHeading = null;
 let _rafId = null;
 let _smoothedHeading = null;
-const HEADING_SMOOTH_FACTOR = 0.35;
+const HEADING_SMOOTH_FACTOR = 0.98;
 
 /**
  * Low-pass filter for compass heading — reduces jitter so the AR marker
