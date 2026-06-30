@@ -22,8 +22,12 @@ const EARTH_RADIUS_KM = 6371;
 const QIBLA_ERROR_MARGIN = 3;
 const SEARCH_RADIUS_KM = 2;
 
-/** Overpass API endpoint (free, CORS-enabled, no key needed) */
-const OVERPASS_URL = "https://overpass-api.de/api/interpreter";
+/** Overpass API endpoints (free, CORS-enabled, no key needed) — tried in order as fallbacks */
+const OVERPASS_ENDPOINTS = [
+  "https://overpass-api.de/api/interpreter",
+  "https://overpass.kumi.systems/api/interpreter",
+  "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
+];
 
 /**
  * Fetch nearby mosques from OpenStreetMap Overpass API.
@@ -35,27 +39,35 @@ async function fetchMosquesFromAPI(lat, lon, radiusMeters) {
     nwr["amenity"="mosque"](around:${radiusMeters},${lat},${lon});
   );out center;`;
 
-  try {
-    const resp = await fetch(OVERPASS_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: "data=" + encodeURIComponent(query),
-    });
-    if (!resp.ok) throw new Error(`Overpass API ${resp.status}`);
-    const json = await resp.json();
-    return (json.elements || []).map(el => {
-      // Nodes have lat/lon directly; ways/relations use center
-      const c = el.center || el;
-      return {
-        name: (el.tags && el.tags.name) || "Mosque",
-        lat: c.lat,
-        lon: c.lon,
-      };
-    }).filter(m => m.lat != null && m.lon != null);
-  } catch (err) {
-    console.warn("Overpass API fetch failed:", err.message);
-    return null; // null signals failure so caller can use fallback
+  for (const endpoint of OVERPASS_ENDPOINTS) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 12000);
+    try {
+      const resp = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: "data=" + encodeURIComponent(query),
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+      if (!resp.ok) throw new Error(`Overpass API ${resp.status}`);
+      const json = await resp.json();
+      const results = (json.elements || []).map(el => {
+        const c = el.center || el;
+        return {
+          name: (el.tags && el.tags.name) || "Mosque",
+          lat: c.lat,
+          lon: c.lon,
+        };
+      }).filter(m => m.lat != null && m.lon != null);
+      return results;
+    } catch (err) {
+      clearTimeout(timeoutId);
+      console.warn(`Overpass endpoint failed (${endpoint}):`, err.message);
+      continue;
+    }
   }
+  return null;
 }
 
 const AppState = {
@@ -393,16 +405,14 @@ async function fetchNearbyMosques(lat, lon) {
     }
   } catch (e) {}
 
-  // No cache and API returned empty — try with wider radius (3x)
-  if (apiResult !== null && apiResult.length === 0) {
-    const widerResult = await fetchMosquesFromAPI(lat, lon, radiusMeters * 3);
-    if (widerResult !== null && widerResult.length > 0) {
-      try { localStorage.setItem(cacheKey, JSON.stringify(widerResult)); } catch (e) {}
-      setMosqueData(widerResult, lat, lon);
-      AppState.mosqueState = "loaded";
-      AppState.emit();
-      return;
-    }
+  // No cache — try with wider radius (5× = 10 km)
+  const widerResult = await fetchMosquesFromAPI(lat, lon, radiusMeters * 5);
+  if (widerResult !== null && widerResult.length > 0) {
+    try { localStorage.setItem(cacheKey, JSON.stringify(widerResult)); } catch (e) {}
+    setMosqueData(widerResult, lat, lon);
+    AppState.mosqueState = "loaded";
+    AppState.emit();
+    return;
   }
 
   // All attempts failed — no mosques found
@@ -472,18 +482,39 @@ async function requestOrientationPermission() {
 let _absoluteSupported = false;
 let _pendingHeading = null;
 let _rafId = null;
+let _smoothedHeading = null;
+const HEADING_SMOOTH_FACTOR = 0.35;
+
+/**
+ * Low-pass filter for compass heading — reduces jitter so the AR marker
+ * doesn't vibrate when the phone is held still.
+ */
+function smoothHeading(raw) {
+  if (_smoothedHeading === null) {
+    _smoothedHeading = raw;
+    return raw;
+  }
+  let diff = raw - _smoothedHeading;
+  if (diff > 180) diff -= 360;
+  if (diff < -180) diff += 360;
+  _smoothedHeading = ((_smoothedHeading + diff * HEADING_SMOOTH_FACTOR) % 360 + 360) % 360;
+  return _smoothedHeading;
+}
 
 /**
  * Throttled orientation handler using requestAnimationFrame.
  * Batches multiple sensor readings into a single render frame update.
  */
+let _rawPendingHeading = null;
+
 function scheduleHeadingUpdate(heading) {
-  _pendingHeading = ((heading % 360) + 360) % 360;
+  _rawPendingHeading = ((heading % 360) + 360) % 360;
   if (!_rafId) {
     _rafId = requestAnimationFrame(function () {
       _rafId = null;
-      if (_pendingHeading != null) {
-        AppState.heading = _pendingHeading;
+      if (_rawPendingHeading != null) {
+        AppState.heading = smoothHeading(_rawPendingHeading);
+        _rawPendingHeading = null;
         AppState.emit();
       }
     });
@@ -1012,13 +1043,15 @@ function renderARMosqueTags(state) {
     const yPos = 30 + (i % 3) * 15;
 
     return `
-      <div class="absolute floating-tag flex flex-col items-center gap-2 pointer-events-auto" style="left:${xPos}%;top:${yPos}%;transform:translate(-50%,0) scale(${scale});opacity:${opacity};animation-delay:${-i * 1.2}s;">
-        <div class="w-10 h-10 glass-panel border border-white/30 rounded-full flex items-center justify-center shadow-lg">
-          <span class="material-symbols-outlined text-primary text-[18px]" style="font-variation-settings:'FILL' 1;">location_on</span>
-        </div>
-        <div class="glass-panel px-stack-md py-stack-sm rounded-xl border border-white/20 shadow-xl min-w-[120px] text-center">
-          <p class="font-title-md text-body-sm text-on-surface font-semibold truncate">${m.name}</p>
-          <p class="font-mono-tech text-label-caps text-primary opacity-80">${formatDistance(m.distance)}</p>
+      <div class="absolute pointer-events-none" style="left:${xPos}%;top:${yPos}%;transform:translate(-50%,0) scale(${scale});opacity:${opacity};">
+        <div class="floating-tag flex flex-col items-center gap-2 pointer-events-auto" style="animation-delay:${-i * 1.2}s;">
+          <div class="w-10 h-10 glass-panel border border-white/30 rounded-full flex items-center justify-center shadow-lg">
+            <span class="material-symbols-outlined text-primary text-[18px]" style="font-variation-settings:'FILL' 1;">location_on</span>
+          </div>
+          <div class="glass-panel px-stack-md py-stack-sm rounded-xl border border-white/20 shadow-xl min-w-[120px] text-center">
+            <p class="font-title-md text-body-sm text-on-surface font-semibold truncate">${m.name}</p>
+            <p class="font-mono-tech text-label-caps text-primary opacity-80">${formatDistance(m.distance)}</p>
+          </div>
         </div>
       </div>`;
   }).join("");
